@@ -1,0 +1,13 @@
+id,name,addr,lat,lng,sport,status,reserveUrl
+jarry-1,Parc Jarry — terrain synthétique,"285 Rue Gary-Carter, Villeray",45.5372,-73.6209,soccer,occupe,https://montreal.ca/lieux/parc-jarry
+lafontaine-1,Parc La Fontaine — terrain est,"3819 Av. Calixa-Lavallée, Plateau",45.5259,-73.5701,soccer,priorite,https://montreal.ca/lieux/parc-la-fontaine
+laurier-1,Parc Laurier,"380 Av. Laurier E, Plateau",45.5245,-73.5850,soccer,libre,https://montreal.ca/lieux/parc-laurier
+extension-1,Parc Howard — terrain multisports,"6360 Av. de Chateaubriand, Parc-Extension",45.5354,-73.6118,soccer,libre,https://montreal.ca
+ahuntsic-1,Parc Ahuntsic,"10500 Rue Laverdure, Ahuntsic",45.5535,-73.6634,soccer,libre,https://montreal.ca
+angrignon-1,Parc Angrignon — terrain sud,"3400 Bd des Trinitaires, Sud-Ouest",45.4536,-73.6032,soccer,occupe,https://montreal.ca
+maisonneuve-1,Parc Maisonneuve,"4601 Sherbrooke E, Mercier–HM",45.5601,-73.5567,soccer,priorite,https://montreal.ca
+claude-robillard,Complexe Claude-Robillard,"1000 Av. Émile-Journault E, Ahuntsic",45.5461,-73.6362,soccer,occupe,https://montreal.ca/lieux/complexe-sportif-claude-robillard
+toussaint-1,Parc Toussaint-Louverture,"1050 Rue de la Cathédrale, Petite-Bourgogne",45.4842,-73.5766,soccer,libre,https://montreal.ca
+rosemont-1,Parc Sir-Wilfrid-Laurier,"Rue Beaubien E, Rosemont",45.5427,-73.5786,soccer,libre,https://montreal.ca
+jeanne-mance,Parc Jeanne-Mance — terrain nord,"3990 Av. de l'Esplanade, Plateau",45.5165,-73.5921,soccer,signale,https://montreal.ca
+coderre-1,Parc Coderre — synthétique,"8200 Bd Saint-Michel, Villeray",45.5568,-73.6203,soccer,priorite,https://montreal.ca
