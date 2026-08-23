@@ -373,8 +373,20 @@ function todaysDbSlots(t){
    l'occupation immédiate : il suffit de réserver à partir de "maintenant")
    ===================================================================== */
 let bookings = {};      // terrainId -> [{id,start,end,players,ts}]
+let myBookings = new Set(); // clés "terrainId|bookingId" créées depuis cette session
+
+async function loadMyBookings(){
+  try{
+    const r = await window.storage.get('my-bookings', false);
+    if(r && r.value) myBookings = new Set(JSON.parse(r.value));
+  }catch(e){}
+}
+async function saveMyBookings(){
+  try{ await window.storage.set('my-bookings', JSON.stringify([...myBookings]), false); }catch(e){}
+}
 
 async function loadCommunityData(){
+  await loadMyBookings();
   try{
     const bookKeys = (await window.storage.list('bookings:', true))?.keys || [];
     for(const k of bookKeys){
@@ -415,20 +427,23 @@ async function addBooking(terrainId, startStr, endStr, players){
   const entry = {id: 'b'+Date.now(), start:startStr, end:endStr, players: Math.min(players, capacity), ts: Date.now()};
   const list = bookings[terrainId] = existing.concat(entry);
   try{ await window.storage.set('bookings:'+terrainId, JSON.stringify(list), true); }catch(e){}
+  myBookings.add(terrainId+'|'+entry.id);
+  await saveMyBookings();
   render();
   return {ok:true};
 }
 window.addBooking = addBooking;
 
-async function endBookingNow(terrainId, bookingId){
-  const list = (bookings[terrainId]||[]);
-  const b = list.find(x=>x.id===bookingId);
-  if(b) b.end = fmtMin(nowMin());
+async function deleteBooking(terrainId, bookingId){
+  const list = (bookings[terrainId]||[]).filter(b=>b.id!==bookingId);
+  bookings[terrainId] = list;
   try{ await window.storage.set('bookings:'+terrainId, JSON.stringify(list), true); }catch(e){}
+  myBookings.delete(terrainId+'|'+bookingId);
+  await saveMyBookings();
   render();
   openDetail(terrainId);
 }
-window.endBookingNow = endBookingNow;
+window.deleteBooking = deleteBooking;
 
 /* =====================================================================
    CALCUL DU STATUT EFFECTIF
@@ -445,12 +460,6 @@ function colorForCount(players, capacity){
 
 function effectiveStatus(t){
   const nm = nowMin();
-
-  // Terrain dont le calendrier de réservation est externe et non synchronisable :
-  // on ne peut pas connaître la dispo réelle, donc on l'indique clairement plutôt que de deviner.
-  if(t.embedUrl){
-    return {status:'signale', source:'external', note:`Selon calendrier partagé — voir l'aperçu ci-dessous`};
-  }
 
   // 1. réservation communautaire active maintenant (couvre aussi l'occupation immédiate)
   const activeBooking = activeBookingsToday(t.id).find(b => toMin(b.start) <= nm && nm < toMin(b.end));
@@ -540,14 +549,25 @@ function openMiniPopup(t){
    PANNEAU DÉTAIL
    ===================================================================== */
 function renderTimeline(t){
-  const slots = todaysDbSlots(t);
+  const dbRows = todaysDbSlots(t).map(s=>({
+    start:s.start, end:s.end, status:s.status, label:s.label, kind:'db',
+  }));
+  const bookingRows = activeBookingsToday(t.id).map(b=>({
+    start:toMin(b.start), end:toMin(b.end),
+    status: colorForCount(b.players, t.capacity) || 'libre',
+    label: `Réservation — ${b.players} pers.${myBookings.has(t.id+'|'+b.id) ? ' (vous)' : ''}`,
+    kind:'booking', bookingId:b.id,
+  }));
+  const rows = dbRows.concat(bookingRows).sort((a,b)=>a.start-b.start);
+  if(!rows.length) return `<div class="timeline-empty">Aucun horaire particulier aujourd'hui — terrain libre selon disponibilité.</div>`;
   const nm = nowMin();
-  if(!slots.length) return `<div class="timeline-empty">Aucun horaire particulier aujourd'hui — terrain libre selon disponibilité.</div>`;
-  return slots.map(s=>{
+  return rows.map(s=>{
     const active = nm >= s.start && nm < s.end;
+    const mine = s.kind==='booking' && myBookings.has(t.id+'|'+s.bookingId);
+    const delBtn = mine ? `<button class="copy-btn" style="margin-left:auto;" onclick="deleteBooking('${t.id}','${s.bookingId}')">Supprimer</button>` : '';
     return `<div class="timeline-row" style="${active?'font-weight:600;':''}">
       <span class="status-dot s-${s.status}-dot"></span>
-      <span class="hrs">${fmtMin(s.start)}–${fmtMin(s.end)}</span> ${s.label}
+      <span class="hrs">${fmtMin(s.start)}–${fmtMin(s.end)}</span> ${s.label}${delBtn}
     </div>`;
   }).join('');
 }
@@ -583,14 +603,11 @@ function fallbackCopy(text, done){
 window.copyEmail = copyEmail;
 
 function renderReservationRow(t){
-  if(!t.reserveUrl){
-    return `<div class="notes-box" style="margin-top:10px;">Pas de réservation officielle pour ce terrain.</div>`;
-  }
-  if(t.reserveUrl.startsWith('mailto:')){
-    const email = t.reserveUrl.replace('mailto:','');
-    return `<div class="email-row"><span class="email-text">${email}</span><button class="copy-btn" onclick="copyEmail('${email}', this)">Copier</button></div>`;
-  }
-  return `<a class="reserve-link" href="${t.reserveUrl}" target="_blank" rel="noopener">Réservation officielle / infos</a>`;
+  if(!t.reserveUrl) return '';
+  const inner = t.reserveUrl.startsWith('mailto:')
+    ? (()=>{ const email = t.reserveUrl.replace('mailto:',''); return `<div class="email-row"><span class="email-text">${email}</span><button class="copy-btn" onclick="copyEmail('${email}', this)">Copier</button></div>`; })()
+    : `<a class="reserve-link" href="${t.reserveUrl}" target="_blank" rel="noopener">Réservation officielle / infos</a>`;
+  return `<div class="section"><h3>Réservation de permis</h3>${inner}</div>`;
 }
 
 function openDetail(id){
@@ -607,7 +624,6 @@ function openDetail(id){
   if(t.format) tags.push(t.format);
   if(t.surface) tags.push(t.surface);
   if(t.capacity) tags.push(`${t.capacity} joueurs max`);
-  tags.push(t.reservable ? 'Réservable' : 'Non réservable');
   const tagsHtml = `<div class="tag-row">${tags.map(x=>`<span class="tag">${x}</span>`).join('')}</div>`;
 
   let notesHtml = '';
@@ -619,54 +635,31 @@ function openDetail(id){
       : `<div class="notes-box">${t.notes}</div>`;
   }
 
-  let middleSectionHtml;
-  if(t.embedUrl){
-    // Calendrier externe qu'on ne peut pas synchroniser directement : aperçu + lien, pas de formulaire.
-    middleSectionHtml = `
-      <div class="section">
-        <h3>Calendrier partagé</h3>
-        <div class="form-msg" style="color:var(--ink-dim);margin-bottom:6px;">La disponibilité de ce terrain suit un calendrier externe qu'on ne peut pas éditer depuis Stadio pour l'instant — voici un aperçu en direct.</div>
-        <div style="width:100%;height:190px;overflow:hidden;border:1px solid var(--line);border-radius:8px;position:relative;background:var(--bg);">
-          <iframe src="${t.embedUrl}" style="width:100%;height:520px;border:none;margin-top:-230px;" loading="lazy"></iframe>
+  const nextSlotIn30 = fmtMin(Math.min(23*60+59, nm + 30));
+  const startOpts = `<option value="${nowStr}">Maintenant (${nowStr})</option>` + timeOptions(nextSlotIn30);
+  const bookingSectionHtml = `
+    <div class="section">
+      <h3>Réservation</h3>
+      <div class="row">
+        <div style="flex:1;">
+          <label>Début</label>
+          <select id="bookStart">${startOpts}</select>
         </div>
-        <div class="form-msg" style="color:var(--ink-dim);margin-top:4px;">Aperçu rogné pour gagner de la place — si le calendrier n'est pas bien cadré, utilise le lien ci-dessous.</div>
+        <div style="flex:1;">
+          <label>Fin</label>
+          <select id="bookEnd">${timeOptions(fmtMin(Math.min(23*60+59, nm+90)))}</select>
+        </div>
       </div>
-    `;
-  }else{
-    const nextSlotIn30 = fmtMin(Math.min(23*60+59, nm + 30));
-    const startOpts = `<option value="${nowStr}">Maintenant (${nowStr})</option>` + timeOptions(nextSlotIn30);
-    const activeNow = eff.booking;
-    const activeBadge = activeNow ? `
-      <div class="live-badge">
-        <span>Réservé actuellement — ${activeNow.players} pers. jusqu'à ${activeNow.end}</span>
-        <button class="btn danger" style="width:auto;padding:5px 8px;" onclick="endBookingNow('${t.id}','${activeNow.id}')">Terminer</button>
-      </div>` : '';
-    middleSectionHtml = `
-      <div class="section">
-        <h3>Réservation</h3>
-        <div class="form-msg" style="color:var(--ink-dim);margin-bottom:6px;">Pour occuper le terrain maintenant, choisis "Maintenant" comme heure de début.</div>
-        ${activeBadge}
-        <div class="row">
-          <div style="flex:1;">
-            <label>Début</label>
-            <select id="bookStart">${startOpts}</select>
-          </div>
-          <div style="flex:1;">
-            <label>Fin</label>
-            <select id="bookEnd">${timeOptions(fmtMin(Math.min(23*60+59, nm+90)))}</select>
-          </div>
+      <div class="row">
+        <div style="flex:1;">
+          <label>Nombre de joueurs</label>
+          <input type="number" id="bookCount" min="1" max="${t.capacity||99}" value="4">
         </div>
-        <div class="row">
-          <div style="flex:1;">
-            <label>Nombre de joueurs</label>
-            <input type="number" id="bookCount" min="1" max="${t.capacity||99}" value="4">
-          </div>
-        </div>
-        <button class="btn primary" onclick="submitBooking('${t.id}')">Réserver</button>
-        <div id="bookMsg"></div>
       </div>
-    `;
-  }
+      <button class="btn primary" onclick="submitBooking('${t.id}')">Réserver</button>
+      <div id="bookMsg"></div>
+    </div>
+  `;
 
   document.getElementById('sidebar').innerHTML = `
     <div class="detail">
@@ -681,17 +674,15 @@ function openDetail(id){
       ${tagsHtml}
 
       <div class="timeline">
-        <h3>Aujourd'hui</h3>
+        <h3>Planning du jour</h3>
         ${renderTimeline(t)}
       </div>
 
-      ${middleSectionHtml}
-
-      ${notesHtml ? `<div class="section"><h3>Détails</h3>${notesHtml}</div>` : ''}
+      ${bookingSectionHtml}
 
       ${renderReservationRow(t)}
 
-      <div class="updated-note">Mis à jour à l'instant</div>
+      ${notesHtml ? `<div class="section"><h3>Détails</h3>${notesHtml}</div>` : ''}
     </div>
   `;
   isProgrammaticMove = true;
@@ -787,7 +778,7 @@ function render(){
   markers = {};
   list.forEach(t=>{
     const eff = effectiveStatus(t);
-    const fresh = eff.source === 'live';
+    const fresh = eff.source === 'booking';
     const m = L.marker([t.lat,t.lng], {icon: pinIcon(eff.status, fresh)}).addTo(map);
     m.bindPopup('', {closeButton:true, offset:[0,-4]});
     m.on('click', ()=> openMiniPopup(t));
