@@ -130,17 +130,17 @@
   }
 
   /* ---------- Panneau détail (dans la sidebar) ---------- */
-  .detail{padding:14px;overflow-y:auto;flex:1;}
+  .detail{padding:12px 14px;overflow-y:auto;flex:1;}
   .back-btn{
     background:none;border:none;color:var(--ink-dim);font-size:12.5px;font-weight:600;
     cursor:pointer;padding:0 0 12px;display:flex;align-items:center;gap:4px;
   }
   .back-btn:hover{color:var(--floodlight);}
-  .detail-img{width:100%;height:150px;object-fit:cover;border-radius:var(--radius);margin-bottom:12px;background:var(--bg);}
-  .detail-name{font-family:'Teko',sans-serif;font-size:26px;font-weight:600;text-transform:uppercase;line-height:1.05;margin-bottom:8px;}
+  .detail-img{width:100%;height:100px;object-fit:cover;border-radius:var(--radius);margin-bottom:10px;background:var(--bg);}
+  .detail-name{font-family:'Teko',sans-serif;font-size:24px;font-weight:600;text-transform:uppercase;line-height:1.05;margin-bottom:6px;}
   .detail-status{
-    display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;
-    padding:8px 12px;border-radius:8px;margin-bottom:12px;
+    display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;
+    padding:7px 11px;border-radius:8px;margin-bottom:10px;
   }
   .detail-status.s-libre{background:rgba(47,158,92,.10);}
   .detail-status.s-occupe{background:rgba(217,72,58,.10);}
@@ -148,24 +148,38 @@
   .detail-status.s-signale{background:rgba(61,127,196,.10);}
   .detail-status .status-dot{width:10px;height:10px;}
 
-  .fact-row{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);margin-bottom:6px;}
-  .fact-row .ic{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+  .tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .tag{
+    font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:6px;
+    background:var(--bg);border:1px solid var(--line);color:var(--ink-dim);white-space:nowrap;
+  }
+
+  .email-row{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:10px;}
+  .email-row .email-text{flex:1;color:var(--ink);word-break:break-all;}
+  .copy-btn{
+    font-size:11px;font-weight:600;padding:5px 9px;border-radius:6px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);cursor:pointer;flex-shrink:0;
+  }
+  .copy-btn:hover{border-color:var(--floodlight);color:var(--floodlight);}
+  .copy-btn.copied{border-color:var(--libre);color:var(--libre);}
+
+  .notes-toggle{font-size:11.5px;color:var(--floodlight);cursor:pointer;font-weight:600;margin-top:4px;display:inline-block;}
 
   .timeline{
-    margin:14px 0;padding-left:12px;border-left:3px solid var(--line);
+    margin:10px 0;padding-left:10px;border-left:3px solid var(--line);
   }
   .timeline h3{
-    font-family:'Teko',sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.03em;
-    margin:0 0 8px;color:var(--ink);
+    font-family:'Teko',sans-serif;font-size:15px;text-transform:uppercase;letter-spacing:.03em;
+    margin:0 0 6px;color:var(--ink);
   }
-  .timeline-row{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:6px;color:var(--ink);}
-  .timeline-row .status-dot{width:8px;height:8px;}
-  .timeline-row .hrs{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-dim);min-width:78px;}
-  .timeline-empty{font-size:12.5px;color:var(--ink-dim);}
+  .timeline-row{display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:4px;color:var(--ink);}
+  .timeline-row .status-dot{width:7px;height:7px;}
+  .timeline-row .hrs{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-dim);min-width:74px;}
+  .timeline-empty{font-size:12px;color:var(--ink-dim);}
 
-  .section{margin:16px 0;padding-top:14px;border-top:1px solid var(--line);}
+  .section{margin:10px 0;padding-top:10px;border-top:1px solid var(--line);}
   .section h3{
-    font-family:'Teko',sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.03em;margin:0 0 8px;
+    font-family:'Teko',sans-serif;font-size:15px;text-transform:uppercase;letter-spacing:.03em;margin:0 0 6px;
   }
   .row{display:flex;gap:8px;margin-bottom:8px;}
   .row label{font-size:11.5px;color:var(--ink-dim);display:block;margin-bottom:3px;}
@@ -355,22 +369,12 @@ function todaysDbSlots(t){
 }
 
 /* =====================================================================
-   STOCKAGE COMMUNAUTAIRE (partagé) — occupation en direct + réservations
+   STOCKAGE COMMUNAUTAIRE (partagé) — réservations (couvre aussi
+   l'occupation immédiate : il suffit de réserver à partir de "maintenant")
    ===================================================================== */
-const LIVE_TTL_MS = 3 * 60 * 60 * 1000; // 3h par défaut pour une occupation "en direct"
-let liveReports = {};   // terrainId -> {players, ts}
 let bookings = {};      // terrainId -> [{id,start,end,players,ts}]
 
 async function loadCommunityData(){
-  try{
-    const liveKeys = (await window.storage.list('live:', true))?.keys || [];
-    for(const k of liveKeys){
-      try{
-        const r = await window.storage.get(k, true);
-        if(r && r.value) liveReports[k.replace('live:','')] = JSON.parse(r.value);
-      }catch(e){}
-    }
-  }catch(e){}
   try{
     const bookKeys = (await window.storage.list('bookings:', true))?.keys || [];
     for(const k of bookKeys){
@@ -382,22 +386,6 @@ async function loadCommunityData(){
   }catch(e){}
   render();
 }
-
-async function setLiveOccupation(terrainId, players){
-  const payload = {players, ts: Date.now()};
-  liveReports[terrainId] = payload;
-  try{ await window.storage.set('live:'+terrainId, JSON.stringify(payload), true); }catch(e){}
-  render();
-  openDetail(terrainId);
-}
-async function clearLiveOccupation(terrainId){
-  delete liveReports[terrainId];
-  try{ await window.storage.delete('live:'+terrainId, true); }catch(e){}
-  render();
-  openDetail(terrainId);
-}
-window.setLiveOccupation = setLiveOccupation;
-window.clearLiveOccupation = clearLiveOccupation;
 
 function activeBookingsToday(terrainId){
   const list = (bookings[terrainId]||[]);
@@ -432,6 +420,16 @@ async function addBooking(terrainId, startStr, endStr, players){
 }
 window.addBooking = addBooking;
 
+async function endBookingNow(terrainId, bookingId){
+  const list = (bookings[terrainId]||[]);
+  const b = list.find(x=>x.id===bookingId);
+  if(b) b.end = fmtMin(nowMin());
+  try{ await window.storage.set('bookings:'+terrainId, JSON.stringify(list), true); }catch(e){}
+  render();
+  openDetail(terrainId);
+}
+window.endBookingNow = endBookingNow;
+
 /* =====================================================================
    CALCUL DU STATUT EFFECTIF
    Priorité : occupation en direct (fraîche) > réservation communautaire
@@ -448,21 +446,20 @@ function colorForCount(players, capacity){
 function effectiveStatus(t){
   const nm = nowMin();
 
-  // 1. occupation en direct
-  const live = liveReports[t.id];
-  if(live && (Date.now()-live.ts) < LIVE_TTL_MS){
-    const st = colorForCount(live.players, t.capacity) || 'libre';
-    return {status:st, source:'live', note:`${live.players} joueur${live.players>1?'s':''} sur place`, ts:live.ts};
+  // Terrain dont le calendrier de réservation est externe et non synchronisable :
+  // on ne peut pas connaître la dispo réelle, donc on l'indique clairement plutôt que de deviner.
+  if(t.embedUrl){
+    return {status:'signale', source:'external', note:`Selon calendrier partagé — voir l'aperçu ci-dessous`};
   }
 
-  // 2. réservation communautaire active maintenant
+  // 1. réservation communautaire active maintenant (couvre aussi l'occupation immédiate)
   const activeBooking = activeBookingsToday(t.id).find(b => toMin(b.start) <= nm && nm < toMin(b.end));
   if(activeBooking){
     const st = colorForCount(activeBooking.players, t.capacity) || 'libre';
-    return {status:st, source:'booking', note:`Réservé par un joueur jusqu'à ${activeBooking.end} — ${activeBooking.players} pers.`};
+    return {status:st, source:'booking', note:`Réservé par un joueur jusqu'à ${activeBooking.end} — ${activeBooking.players} pers.`, booking:activeBooking};
   }
 
-  // 3. créneau officiel de la base de données
+  // 2. créneau officiel de la base de données
   const dbSlot = todaysDbSlots(t).find(s => s.start <= nm && nm < s.end);
   let status, note;
   if(dbSlot){
@@ -473,7 +470,7 @@ function effectiveStatus(t){
     note = '';
   }
 
-  // 4. "bientôt occupé" — seulement si actuellement libre
+  // 3. "bientôt occupé" — seulement si actuellement libre
   if(status === 'libre'){
     const upcoming = [];
     todaysDbSlots(t).forEach(s=>{ if(s.status==='occupe' && s.start > nm && s.start - nm <= 30) upcoming.push({at:s.start, label:s.label}); });
@@ -529,7 +526,9 @@ function openMiniPopup(t){
   const eff = effectiveStatus(t);
   const m = markers[t.id];
   if(!m) return;
+  const imgHtml = t.photoUrl ? `<img src="${t.photoUrl}" alt="${t.name}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:8px;" onerror="this.remove()">` : '';
   m.setPopupContent(`
+    ${imgHtml}
     <div class="pop-name">${t.name}</div>
     <div class="pop-status s-${eff.status}"><span class="status-dot s-${eff.status}-dot" style="display:inline-block;"></span>${STATUS_LABEL[eff.status]}</div>
     <button class="btn-detail" onclick="selectTerrain('${t.id}')">Voir la fiche</button>
@@ -562,22 +561,36 @@ function timeOptions(selected){
   return out;
 }
 
+function copyEmail(email, btn){
+  const done = ()=>{
+    btn.textContent = 'Copié';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = 'Copier'; btn.classList.remove('copied'); }, 1800);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(email).then(done).catch(()=>fallbackCopy(email, done));
+  }else{
+    fallbackCopy(email, done);
+  }
+}
+function fallbackCopy(text, done){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); done(); }catch(e){}
+  document.body.removeChild(ta);
+}
+window.copyEmail = copyEmail;
+
 function renderReservationRow(t){
   if(!t.reserveUrl){
     return `<div class="notes-box" style="margin-top:10px;">Pas de réservation officielle pour ce terrain.</div>`;
   }
   if(t.reserveUrl.startsWith('mailto:')){
     const email = t.reserveUrl.replace('mailto:','');
-    return `<div class="fact-row" style="margin-top:10px;"><span class="ic">✉️</span>mail : ${email}</div>`;
+    return `<div class="email-row"><span class="email-text">${email}</span><button class="copy-btn" onclick="copyEmail('${email}', this)">Copier</button></div>`;
   }
-  // lien externe (site de réservation) — bouton cliquable
-  let embed = '';
-  if(t.embedUrl){
-    embed = `<div style="margin-top:10px;font-size:11px;color:var(--ink-dim);">Calendrier officiel (aperçu) :</div>
-      <iframe src="${t.embedUrl}" style="width:100%;height:260px;border:1px solid var(--line);border-radius:8px;margin-top:4px;" loading="lazy"></iframe>
-      <div style="font-size:10.5px;color:var(--ink-dim);margin-top:4px;">Si le calendrier ne s'affiche pas ci-dessus, utilise le lien ci-dessous.</div>`;
-  }
-  return `${embed}<a class="reserve-link" href="${t.reserveUrl}" target="_blank" rel="noopener">🌐 Réservation officielle / infos</a>`;
+  return `<a class="reserve-link" href="${t.reserveUrl}" target="_blank" rel="noopener">Réservation officielle / infos</a>`;
 }
 
 function openDetail(id){
@@ -585,23 +598,75 @@ function openDetail(id){
   const t = TERRAINS.find(x=>x.id===id);
   if(!t) return;
   const eff = effectiveStatus(t);
-  const capTxt = t.capacity ? `${t.capacity} joueurs (max)` : '';
-  const live = liveReports[t.id] && (Date.now()-liveReports[t.id].ts) < LIVE_TTL_MS ? liveReports[t.id] : null;
   const nm = nowMin();
-  const nextSlotIn30 = fmtMin(Math.min(23*60+59, nm + 30));
+  const nowStr = fmtMin(nm);
 
   const imgHtml = t.photoUrl ? `<img class="detail-img" src="${t.photoUrl}" alt="${t.name}" onerror="this.style.display='none'">` : '';
 
-  const liveHtml = live ? `
-    <div class="live-badge">
-      <span>🟢 ${live.players} joueur${live.players>1?'s':''} signalé${live.players>1?'s':''} sur place · ${timeAgo(live.ts)}</span>
-      <button class="btn danger" style="width:auto;padding:5px 8px;" onclick="clearLiveOccupation('${t.id}')">Je libère</button>
-    </div>` : '';
+  const tags = [];
+  if(t.format) tags.push(t.format);
+  if(t.surface) tags.push(t.surface);
+  if(t.capacity) tags.push(`${t.capacity} joueurs max`);
+  tags.push(t.reservable ? 'Réservable' : 'Non réservable');
+  const tagsHtml = `<div class="tag-row">${tags.map(x=>`<span class="tag">${x}</span>`).join('')}</div>`;
 
-  const bookingsHtml = activeBookingsToday(t.id).map(b=>`
-    <div class="timeline-row"><span class="status-dot s-${colorForCount(b.players,t.capacity)||'libre'}-dot"></span>
-      <span class="hrs">${b.start}–${b.end}</span> Réservé par un joueur — ${b.players} pers.
-    </div>`).join('');
+  let notesHtml = '';
+  if(t.notes){
+    const short = t.notes.length > 90 ? t.notes.slice(0,90) + '…' : t.notes;
+    notesHtml = t.notes.length > 90
+      ? `<div class="notes-box" id="notesShort-${t.id}">${short} <span class="notes-toggle" onclick="document.getElementById('notesShort-${t.id}').style.display='none';document.getElementById('notesFull-${t.id}').style.display='block';">Voir plus</span></div>
+         <div class="notes-box" id="notesFull-${t.id}" style="display:none;">${t.notes}</div>`
+      : `<div class="notes-box">${t.notes}</div>`;
+  }
+
+  let middleSectionHtml;
+  if(t.embedUrl){
+    // Calendrier externe qu'on ne peut pas synchroniser directement : aperçu + lien, pas de formulaire.
+    middleSectionHtml = `
+      <div class="section">
+        <h3>Calendrier partagé</h3>
+        <div class="form-msg" style="color:var(--ink-dim);margin-bottom:6px;">La disponibilité de ce terrain suit un calendrier externe qu'on ne peut pas éditer depuis Stadio pour l'instant — voici un aperçu en direct.</div>
+        <div style="width:100%;height:190px;overflow:hidden;border:1px solid var(--line);border-radius:8px;position:relative;background:var(--bg);">
+          <iframe src="${t.embedUrl}" style="width:100%;height:520px;border:none;margin-top:-230px;" loading="lazy"></iframe>
+        </div>
+        <div class="form-msg" style="color:var(--ink-dim);margin-top:4px;">Aperçu rogné pour gagner de la place — si le calendrier n'est pas bien cadré, utilise le lien ci-dessous.</div>
+      </div>
+    `;
+  }else{
+    const nextSlotIn30 = fmtMin(Math.min(23*60+59, nm + 30));
+    const startOpts = `<option value="${nowStr}">Maintenant (${nowStr})</option>` + timeOptions(nextSlotIn30);
+    const activeNow = eff.booking;
+    const activeBadge = activeNow ? `
+      <div class="live-badge">
+        <span>Réservé actuellement — ${activeNow.players} pers. jusqu'à ${activeNow.end}</span>
+        <button class="btn danger" style="width:auto;padding:5px 8px;" onclick="endBookingNow('${t.id}','${activeNow.id}')">Terminer</button>
+      </div>` : '';
+    middleSectionHtml = `
+      <div class="section">
+        <h3>Réservation</h3>
+        <div class="form-msg" style="color:var(--ink-dim);margin-bottom:6px;">Pour occuper le terrain maintenant, choisis "Maintenant" comme heure de début.</div>
+        ${activeBadge}
+        <div class="row">
+          <div style="flex:1;">
+            <label>Début</label>
+            <select id="bookStart">${startOpts}</select>
+          </div>
+          <div style="flex:1;">
+            <label>Fin</label>
+            <select id="bookEnd">${timeOptions(fmtMin(Math.min(23*60+59, nm+90)))}</select>
+          </div>
+        </div>
+        <div class="row">
+          <div style="flex:1;">
+            <label>Nombre de joueurs</label>
+            <input type="number" id="bookCount" min="1" max="${t.capacity||99}" value="4">
+          </div>
+        </div>
+        <button class="btn primary" onclick="submitBooking('${t.id}')">Réserver</button>
+        <div id="bookMsg"></div>
+      </div>
+    `;
+  }
 
   document.getElementById('sidebar').innerHTML = `
     <div class="detail">
@@ -613,51 +678,16 @@ function openDetail(id){
         ${STATUS_LABEL[eff.status]}${eff.note ? ' — ' + eff.note : ''}
       </div>
 
-      ${t.format ? `<div class="fact-row"><span class="ic">⚽</span>${t.format}</div>` : ''}
-      ${t.surface ? `<div class="fact-row"><span class="ic">🌱</span>${t.surface}</div>` : ''}
-      ${capTxt ? `<div class="fact-row"><span class="ic">👥</span>${capTxt}</div>` : ''}
+      ${tagsHtml}
 
       <div class="timeline">
         <h3>Aujourd'hui</h3>
         ${renderTimeline(t)}
-        ${bookingsHtml}
       </div>
 
-      <div class="section">
-        <h3>Occupation en direct</h3>
-        ${liveHtml}
-        <div class="row">
-          <div style="flex:1;">
-            <label>Nombre de joueurs sur place</label>
-            <input type="number" id="liveCount" min="1" max="${t.capacity||99}" value="4">
-          </div>
-        </div>
-        <button class="btn primary" onclick="submitLive('${t.id}')">J'occupe ce terrain</button>
-      </div>
+      ${middleSectionHtml}
 
-      <div class="section">
-        <h3>Réserver un créneau</h3>
-        <div class="row">
-          <div style="flex:1;">
-            <label>Début</label>
-            <select id="bookStart">${timeOptions(nextSlotIn30)}</select>
-          </div>
-          <div style="flex:1;">
-            <label>Fin</label>
-            <select id="bookEnd">${timeOptions(fmtMin(Math.min(23*60+59, nm+90)))}</select>
-          </div>
-        </div>
-        <div class="row">
-          <div style="flex:1;">
-            <label>Nombre de joueurs prévus</label>
-            <input type="number" id="bookCount" min="1" max="${t.capacity||99}" value="4">
-          </div>
-        </div>
-        <button class="btn primary" onclick="submitBooking('${t.id}')">Réserver ce créneau</button>
-        <div id="bookMsg"></div>
-      </div>
-
-      ${t.notes ? `<div class="section"><h3>Détails</h3><div class="notes-box">${t.notes}</div></div>` : ''}
+      ${notesHtml ? `<div class="section"><h3>Détails</h3>${notesHtml}</div>` : ''}
 
       ${renderReservationRow(t)}
 
@@ -671,13 +701,6 @@ function openDetail(id){
 }
 window.openDetail = openDetail;
 window.selectTerrain = (id)=>{ openDetail(id); };
-
-async function submitLive(terrainId){
-  const n = parseInt(document.getElementById('liveCount').value, 10);
-  if(!n || n < 1){ return; }
-  await setLiveOccupation(terrainId, n);
-}
-window.submitLive = submitLive;
 
 async function submitBooking(terrainId){
   const start = document.getElementById('bookStart').value;
