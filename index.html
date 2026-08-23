@@ -3,29 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dispo — Terrains de sport à Montréal</title>
+<title>Stadio — Terrains de sport à Montréal</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --turf-dark:#122A1C;
-    --turf-mid:#1B3D28;
-    --turf-line:#2C5B3C;
-    --chalk:#ECEEE4;
-    --chalk-dim:#C9CDBE;
+    --turf-dark:#F4F5F1;
+    --turf-mid:#FFFFFF;
+    --turf-line:#DDE1D6;
+    --chalk:#16241A;
+    --chalk-dim:#6B7568;
     --ink:#0E1F16;
-    --floodlight:#FFC857;
-    --floodlight-dim:#8A6B2A;
-    --libre:#3FB27F;
-    --occupe:#E4574A;
-    --priorite:#F0A63A;
-    --signale:#4A90D9;
+    --floodlight:#2F7D4F;
+    --floodlight-dim:#BFE0CC;
+    --libre:#2F9E5C;
+    --occupe:#D9483A;
+    --priorite:#DB9A25;
+    --signale:#3D7FC4;
     --radius:10px;
+    --shadow:0 6px 18px rgba(20,40,25,.10);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;height:100%;background:var(--turf-dark);color:var(--chalk);font-family:'IBM Plex Sans',sans-serif;overflow:hidden;}
-  ::selection{background:var(--floodlight);color:var(--ink);}
+  ::selection{background:var(--floodlight);color:#fff;}
 
   /* ---------- Layout shell ---------- */
   .app{display:flex;flex-direction:column;height:100vh;}
@@ -37,7 +38,7 @@
     flex-shrink:0;z-index:20;
   }
   .wordmark{display:flex;align-items:baseline;gap:10px;}
-  .wordmark .dot{width:10px;height:10px;border-radius:50%;background:var(--libre);box-shadow:0 0 0 3px rgba(63,178,127,.25);flex-shrink:0;align-self:center;}
+  .wordmark .dot{width:10px;height:10px;border-radius:50%;background:var(--libre);box-shadow:0 0 0 3px rgba(47,158,92,.20);flex-shrink:0;align-self:center;}
   .wordmark h1{
     font-family:'Teko',sans-serif;font-weight:600;font-size:32px;letter-spacing:.5px;
     margin:0;color:var(--chalk);line-height:1;text-transform:uppercase;
@@ -58,13 +59,13 @@
     display:flex;align-items:center;gap:6px;transition:all .15s ease;
   }
   .chip:hover{border-color:var(--floodlight-dim);}
-  .chip.active{background:var(--floodlight);color:var(--ink);border-color:var(--floodlight);}
+  .chip.active{background:var(--floodlight);color:#fff;border-color:var(--floodlight);}
   .chip.disabled{opacity:.4;cursor:not-allowed;}
   .chip.disabled:hover{border-color:var(--turf-line);}
 
   /* ---------- Main split ---------- */
   main.split{flex:1;display:flex;min-height:0;}
-  #map{flex:1;min-width:0;background:#0d1f15;}
+  #map{flex:1;min-width:0;background:#E7EAE1;}
   aside.list{
     width:380px;flex-shrink:0;border-left:1px solid var(--turf-line);
     background:var(--turf-mid);display:flex;flex-direction:column;min-height:0;
@@ -80,11 +81,12 @@
   .list-body{flex:1;overflow-y:auto;padding:8px;}
 
   .card{
-    background:var(--turf-dark);border:1px solid var(--turf-line);border-radius:var(--radius);
-    padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s ease, transform .1s ease;
+    background:var(--turf-mid);border:1px solid var(--turf-line);border-radius:var(--radius);
+    padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s ease, transform .1s ease, box-shadow .15s ease;
+    box-shadow:0 1px 2px rgba(20,40,25,.04);
   }
-  .card:hover{border-color:var(--floodlight-dim);}
-  .card.selected{border-color:var(--floodlight);background:var(--turf-mid);}
+  .card:hover{border-color:var(--floodlight-dim);box-shadow:var(--shadow);}
+  .card.selected{border-color:var(--floodlight);background:#F3FAF5;}
   .card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;}
   .card-name{font-weight:600;font-size:14.5px;color:var(--chalk);}
   .status-pill{
@@ -98,10 +100,10 @@
   .s-occupe{color:var(--occupe);}
   .s-priorite{color:var(--priorite);}
   .s-signale{color:var(--signale);}
-  .status-pill.s-libre{background:rgba(63,178,127,.15);color:var(--libre);}
-  .status-pill.s-occupe{background:rgba(228,87,74,.15);color:var(--occupe);}
-  .status-pill.s-priorite{background:rgba(240,166,58,.15);color:var(--priorite);}
-  .status-pill.s-signale{background:rgba(74,144,217,.15);color:var(--signale);}
+  .status-pill.s-libre{background:rgba(47,158,92,.12);color:var(--libre);}
+  .status-pill.s-occupe{background:rgba(217,72,58,.12);color:var(--occupe);}
+  .status-pill.s-priorite{background:rgba(219,154,37,.14);color:var(--priorite);}
+  .status-pill.s-signale{background:rgba(61,127,196,.12);color:var(--signale);}
 
   /* ---------- Leaflet marker ---------- */
   .pin{
@@ -121,7 +123,7 @@
   /* ---------- Leaflet popup theming ---------- */
   .leaflet-popup-content-wrapper{background:var(--turf-mid);color:var(--chalk);border-radius:var(--radius);}
   .leaflet-popup-tip{background:var(--turf-mid);}
-  .leaflet-popup-content{margin:14px 16px;font-family:'IBM Plex Sans',sans-serif;min-width:220px;}
+  .leaflet-popup-content{margin:12px 14px;font-family:'IBM Plex Sans',sans-serif;min-width:240px;}
   .pop-name{font-family:'Teko',sans-serif;font-size:22px;font-weight:600;text-transform:uppercase;margin-bottom:2px;}
   .pop-addr{font-size:12px;color:var(--chalk-dim);margin-bottom:8px;}
   .pop-status{display:flex;align-items:center;gap:6px;font-size:12.5px;margin-bottom:10px;}
@@ -134,16 +136,25 @@
   .btn-report:hover{border-color:var(--floodlight);color:var(--floodlight);}
   .btn-reserve{
     display:inline-block;font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;font-weight:600;
-    padding:8px 12px;border-radius:6px;background:var(--floodlight);color:var(--ink);
+    padding:8px 12px;border-radius:6px;background:var(--floodlight);color:#fff;
     text-decoration:none;text-align:center;width:100%;
   }
   .pop-note{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--chalk-dim);margin-top:8px;}
+  .pop-img{
+    width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:10px;
+    background:var(--turf-dark);display:block;
+  }
+  .pop-img-wrap{position:relative;}
+  .pop-img-tag{
+    position:absolute;bottom:6px;right:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;
+    background:rgba(14,31,22,.55);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.03em;
+  }
 
   /* ---------- Legend (scoreboard) ---------- */
   .scoreboard{
     position:absolute;bottom:16px;left:16px;z-index:15;
     background:var(--turf-mid);border:1px solid var(--turf-line);border-radius:var(--radius);
-    padding:10px 12px;display:flex;gap:14px;box-shadow:0 6px 18px rgba(0,0,0,.35);
+    padding:10px 12px;display:flex;gap:14px;box-shadow:var(--shadow);
   }
   .sb-item{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--chalk-dim);}
   .sb-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
@@ -172,7 +183,7 @@
   <header class="top">
     <div class="wordmark">
       <span class="dot"></span>
-      <h1>Dispo</h1>
+      <h1>Stadio</h1>
       <span class="tag">terrains de Montréal, en temps réel</span>
     </div>
     <div class="top-meta">mise à jour <b id="clock">--:--</b> · <span id="counter">-- terrains suivis</span></div>
@@ -187,7 +198,7 @@
     <aside class="list">
       <div class="list-head">
         <h2 id="listTitle">Terrains — Soccer</h2>
-        <p id="listSub">Trié par proximité du centre-ville. Cliquer un terrain pour le centrer sur la carte.</p>
+        <p id="listSub">Cliquer un terrain pour le centrer sur la carte.</p>
       </div>
       <div class="list-body" id="listBody"></div>
     </aside>
@@ -239,11 +250,16 @@ async function loadTerrainsFromCSV(){
         id: String(row.id),
         name: row.name,
         addr: row.addr,
+        arrondissement: row.arrondissement || '',
+        notes: row.notes || '',
+        source: row.source || '',
         lat: row.lat,
         lng: row.lng,
         sport: row.sport,
         base: row.status,
         reserveUrl: row.reserveUrl || 'https://montreal.ca',
+        reservedSlots: parseSlots(row.reserved_slots),
+        imageUrl: row.image_url || '',
       }));
     if(statusEl) statusEl.style.display = 'none';
   }catch(e){
@@ -256,9 +272,80 @@ async function loadTerrainsFromCSV(){
 }
 
 /* =====================================================================
-   STOCKAGE — les signalements communautaires sont partagés (shared:true)
-   et priment sur le statut de base tant qu'ils sont récents (< 90 min).
+   CRÉNEAUX RÉCURRENTS — colonne CSV "reserved_slots".
+   Format d'une cellule : plusieurs créneaux séparés par "|", chaque créneau =
+   Jours,HeureDébut,HeureFin,DateDébut,DateFin,Statut,Étiquette
+   -> Jours en abrégé FR (Lun Mar Mer Jeu Ven Sam Dim), plage avec "-" ou liste avec "+"
+   -> DateDébut/DateFin au format AAAA-MM-DD, laisser vide si la plage vaut toute l'année
+   -> Statut ∈ {libre, priorite, occupe}
+   Exemple : "Mar+Mer+Jeu,16:00,18:00,2026-07-02,2026-11-02,priorite,Priorité jeunes"
    ===================================================================== */
+const DAY_ORDER = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+function jsDayToOrder(jsDay){ return jsDay === 0 ? 6 : jsDay - 1; } // JS: Dim=0..Sam=6 -> notre ordre Lun=0..Dim=6
+
+function parseSlots(raw){
+  if(!raw || typeof raw !== 'string') return [];
+  return raw.split('|').map(chunk=>{
+    const parts = chunk.split(',').map(s=>s.trim());
+    if(parts.length < 7) return null;
+    const [days, start, end, dateStart, dateEnd, status, label] = parts;
+    return {days, start, end, dateStart: dateStart||null, dateEnd: dateEnd||null, status: status||'occupe', label: label||''};
+  }).filter(Boolean);
+}
+
+function dayMatches(daysField, todayIdx){
+  const parts = daysField.split('+').map(s=>s.trim());
+  return parts.some(p=>{
+    if(p.includes('-')){
+      const [a,b] = p.split('-').map(s=>DAY_ORDER.indexOf(s.trim()));
+      if(a===-1||b===-1) return false;
+      return a<=b ? (todayIdx>=a && todayIdx<=b) : (todayIdx>=a || todayIdx<=b);
+    }
+    return DAY_ORDER.indexOf(p) === todayIdx;
+  });
+}
+
+function dateInRange(dateStart, dateEnd, now){
+  if(!dateStart && !dateEnd) return true;
+  const todayStr = now.toISOString().slice(0,10);
+  if(dateStart && todayStr < dateStart) return false;
+  if(dateEnd && todayStr > dateEnd) return false;
+  return true;
+}
+
+function activeSlotNow(slots){
+  if(!slots || !slots.length) return null;
+  const now = new Date();
+  const todayIdx = jsDayToOrder(now.getDay());
+  const nowMin = now.getHours()*60 + now.getMinutes();
+  for(const s of slots){
+    if(!dayMatches(s.days, todayIdx)) continue;
+    if(!dateInRange(s.dateStart, s.dateEnd, now)) continue;
+    const [sh,sm] = s.start.split(':').map(Number);
+    const [eh,em] = s.end.split(':').map(Number);
+    const startMin = sh*60+sm, endMin = eh*60+em;
+    if(nowMin >= startMin && nowMin < endMin) return {...s, endMin};
+  }
+  return null;
+}
+
+
+/* =====================================================================
+   IMAGE D'APERÇU — si aucune image_url n'est fournie dans le CSV, on
+   affiche une vue satellite (tuile Esri World Imagery, gratuite, sans clé)
+   centrée approximativement sur le terrain, à défaut d'une vraie photo.
+   ===================================================================== */
+function lonToTileX(lon, z){ return Math.floor((lon+180)/360*Math.pow(2,z)); }
+function latToTileY(lat, z){
+  const rad = lat*Math.PI/180;
+  return Math.floor((1-Math.log(Math.tan(rad)+1/Math.cos(rad))/Math.PI)/2*Math.pow(2,z));
+}
+function satImageUrl(lat, lng, z){
+  z = z || 17;
+  const x = lonToTileX(lng, z), y = latToTileY(lat, z);
+  return `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
+}
+
 const REPORT_TTL_MS = 90 * 60 * 1000;
 let reports = {}; // terrainId -> {status, ts, count}
 let activeSport = 'soccer';
@@ -300,6 +387,12 @@ function effectiveStatus(t){
   if(r && (Date.now() - r.ts) < REPORT_TTL_MS){
     return {status: r.status === 'occupe' ? 'signale' : r.status, fresh:true, ts:r.ts, count:r.count};
   }
+  const slot = activeSlotNow(t.reservedSlots);
+  if(slot){
+    const hh = String(Math.floor(slot.endMin/60)).padStart(2,'0');
+    const mm = String(slot.endMin%60).padStart(2,'0');
+    return {status:slot.status, fresh:false, scheduled:true, note:`${slot.label || STATUS_LABEL[slot.status]} jusqu'à ${hh}:${mm}`};
+  }
   return {status: t.base, fresh:false};
 }
 
@@ -316,10 +409,14 @@ function timeAgo(ts){
    ===================================================================== */
 const map = L.map('map', {zoomControl:false}).setView([45.5301, -73.6000], 12);
 L.control.zoom({position:'topright'}).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution:'&copy; OpenStreetMap, &copy; CARTO',
   maxZoom:19,
 }).addTo(map);
+
+let mapUserMoved = false;
+let isProgrammaticMove = false;
+map.on('movestart', ()=>{ if(!isProgrammaticMove) mapUserMoved = true; });
 
 function pinIcon(status, fresh){
   return L.divIcon({
@@ -334,10 +431,22 @@ function pinIcon(status, fresh){
 function openPopup(t, keepView){
   const eff = effectiveStatus(t);
   const m = markers[t.id];
-  const freshLine = eff.fresh ? `<div class="pop-note">Signalé ${timeAgo(eff.ts)} · ${eff.count} signalement${eff.count>1?'s':''}</div>` : '';
+  const freshLine = eff.fresh ? `<div class="pop-note">Signalé ${timeAgo(eff.ts)} · ${eff.count} signalement${eff.count>1?'s':''}</div>`
+    : (eff.scheduled ? `<div class="pop-note">${eff.note}</div>` : '');
+  const notesLine = t.notes ? `<div class="pop-note" style="margin-top:6px;">${t.notes}</div>` : '';
+  const sourceLine = t.source ? `<div class="pop-note" style="opacity:.6;margin-top:4px;">Source : ${t.source}</div>` : '';
+  const imgSrc = t.imageUrl || satImageUrl(t.lat, t.lng);
+  const imgTag = t.imageUrl ? '' : 'vue satellite';
+  const imgHtml = `
+    <div class="pop-img-wrap">
+      <img class="pop-img" src="${imgSrc}" alt="Aperçu de ${t.name}"
+           onerror="this.closest('.pop-img-wrap').style.display='none'">
+      ${imgTag ? `<span class="pop-img-tag">${imgTag}</span>` : ''}
+    </div>`;
   const html = `
+    ${imgHtml}
     <div class="pop-name">${t.name}</div>
-    <div class="pop-addr">${t.addr}</div>
+    <div class="pop-addr">${t.addr}${t.arrondissement ? ' · ' + t.arrondissement : ''}</div>
     <div class="pop-status s-${eff.status}">● ${STATUS_LABEL[eff.status]}</div>
     <div class="pop-actions">
       <button class="btn-report" onclick="fileReport('${t.id}','libre')">Signaler libre</button>
@@ -345,6 +454,8 @@ function openPopup(t, keepView){
     </div>
     <a class="btn-reserve" href="${t.reserveUrl}" target="_blank" rel="noopener">Réserver sur montreal.ca ↗</a>
     ${freshLine}
+    ${notesLine}
+    ${sourceLine}
   `;
   if(m){
     m.setPopupContent(html);
@@ -393,8 +504,8 @@ function renderList(list){
           <div class="status-pill s-${eff.status}">${STATUS_LABEL[eff.status]}</div>
         </div>
         <div class="card-meta">
-          <span>${t.addr}</span>
-          ${eff.fresh ? `<span>${timeAgo(eff.ts)}</span>` : ''}
+          <span>${t.addr}${t.arrondissement ? ' · ' + t.arrondissement : ''}</span>
+          ${eff.fresh ? `<span>${timeAgo(eff.ts)}</span>` : (eff.scheduled ? `<span>${eff.note}</span>` : '')}
         </div>
       </div>
     `;
@@ -427,6 +538,14 @@ function render(){
     m.on('click', ()=>{ selectedId=t.id; openPopup(t, true); renderList(currentList()); });
     markers[t.id] = m;
   });
+
+  // recadre la carte pour que tous les terrains affichés soient visibles
+  if(!mapUserMoved && list.length){
+    isProgrammaticMove = true;
+    const bounds = L.latLngBounds(list.map(t=>[t.lat, t.lng]));
+    map.fitBounds(bounds, {padding:[50,50], maxZoom:14});
+    isProgrammaticMove = false;
+  }
 
   document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
 }
