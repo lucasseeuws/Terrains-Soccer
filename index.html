@@ -289,6 +289,7 @@ async function loadTerrainsFromCSV(){
         surface: row.surface || '',
         reservable: String(row.reservable||'').toLowerCase().startsWith('oui'),
         reserveUrl: row.reserveUrl || '',
+        embedUrl: row.embed_url || '',
         photoUrl: row.photo_url || '',
         base: row.status || 'libre',
         reservedSlots: parseSlots(row.reserved_slots),
@@ -478,7 +479,9 @@ function effectiveStatus(t){
     todaysDbSlots(t).forEach(s=>{ if(s.status==='occupe' && s.start > nm && s.start - nm <= 30) upcoming.push({at:s.start, label:s.label}); });
     activeBookingsToday(t.id).forEach(b=>{
       const st = toMin(b.start);
-      if(st > nm && st - nm <= 30) upcoming.push({at:st, label:`réservation (${b.players} pers.)`});
+      if(st > nm && st - nm <= 30 && colorForCount(b.players, t.capacity) === 'occupe'){
+        upcoming.push({at:st, label:`réservation (${b.players} pers.)`});
+      }
     });
     if(upcoming.length){
       upcoming.sort((a,b)=>a.at-b.at);
@@ -557,6 +560,24 @@ function timeOptions(selected){
     out += `<option value="${v}" ${v===selected?'selected':''}>${v}</option>`;
   }
   return out;
+}
+
+function renderReservationRow(t){
+  if(!t.reserveUrl){
+    return `<div class="notes-box" style="margin-top:10px;">Pas de réservation officielle pour ce terrain.</div>`;
+  }
+  if(t.reserveUrl.startsWith('mailto:')){
+    const email = t.reserveUrl.replace('mailto:','');
+    return `<div class="fact-row" style="margin-top:10px;"><span class="ic">✉️</span>mail : ${email}</div>`;
+  }
+  // lien externe (site de réservation) — bouton cliquable
+  let embed = '';
+  if(t.embedUrl){
+    embed = `<div style="margin-top:10px;font-size:11px;color:var(--ink-dim);">Calendrier officiel (aperçu) :</div>
+      <iframe src="${t.embedUrl}" style="width:100%;height:260px;border:1px solid var(--line);border-radius:8px;margin-top:4px;" loading="lazy"></iframe>
+      <div style="font-size:10.5px;color:var(--ink-dim);margin-top:4px;">Si le calendrier ne s'affiche pas ci-dessus, utilise le lien ci-dessous.</div>`;
+  }
+  return `${embed}<a class="reserve-link" href="${t.reserveUrl}" target="_blank" rel="noopener">🌐 Réservation officielle / infos</a>`;
 }
 
 function openDetail(id){
@@ -638,7 +659,7 @@ function openDetail(id){
 
       ${t.notes ? `<div class="section"><h3>Détails</h3><div class="notes-box">${t.notes}</div></div>` : ''}
 
-      ${t.reserveUrl ? `<a class="reserve-link" href="${t.reserveUrl}" target="_blank" rel="noopener">🌐 Réservation officielle / infos</a>` : `<div class="notes-box" style="margin-top:10px;">Pas de réservation officielle pour ce terrain.</div>`}
+      ${renderReservationRow(t)}
 
       <div class="updated-note">Mis à jour à l'instant</div>
     </div>
