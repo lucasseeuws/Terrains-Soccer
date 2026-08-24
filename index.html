@@ -53,6 +53,7 @@
   .filters{
     display:flex;gap:8px;padding:10px 22px;background:var(--bg);
     border-bottom:1px solid var(--line);overflow-x:auto;flex-shrink:0;
+    align-items:center;
   }
   .chip{
     font-weight:600;font-size:13px;
@@ -223,12 +224,27 @@
 
   #loadError{display:none;background:var(--occupe);color:#fff;font-size:12.5px;padding:8px 22px;font-family:'IBM Plex Mono',monospace;}
 
+  .mobile-tabs{display:none;}
+  .mobile-sport-select{display:none;}
+
   @media (max-width:820px){
-    main.split{position:relative;}
-    aside.list{display:none;}
-    aside.list.mobile-open{
-      display:flex; position:absolute; inset:0; z-index:25; width:100%; height:100%; border:none;
+    .filters{display:none;}
+    .mobile-sport-select{
+      display:block; margin:10px 22px 0; padding:9px 10px; border-radius:8px;
+      border:1px solid var(--line); background:var(--panel); color:var(--ink); font-weight:600; font-size:13px;
     }
+    .mobile-tabs{
+      display:flex; gap:8px; padding:10px 22px; background:var(--bg); border-bottom:1px solid var(--line);
+    }
+    .mobile-tabs button{
+      flex:1; padding:9px; border-radius:8px; border:1px solid var(--line); background:var(--panel);
+      color:var(--ink-dim); font-weight:600; font-size:13px; cursor:pointer;
+    }
+    .mobile-tabs button.active{background:var(--floodlight); color:#fff; border-color:var(--floodlight);}
+
+    #map.mobile-hidden{display:none;}
+    aside.list{display:none;}
+    aside.list.mobile-open{display:flex; width:100%; flex:1;}
     .scoreboard{left:8px;bottom:8px;padding:8px 10px;gap:10px;flex-wrap:wrap;max-width:210px;}
     .top-meta{display:none;}
   }
@@ -252,6 +268,11 @@
   <div id="loadError"></div>
 
   <div class="filters" id="filters"></div>
+  <select class="mobile-sport-select" id="mobileSportSelect" onchange="setSport(this.value)"></select>
+  <div class="mobile-tabs">
+    <button id="tabMap" class="active" onclick="setMobileTab('map')">Carte</button>
+    <button id="tabList" onclick="setMobileTab('list')">Liste</button>
+  </div>
 
   <main class="split">
     <div id="map"></div>
@@ -540,6 +561,37 @@ function timeAgo(ts){
 /* =====================================================================
    CARTE
    ===================================================================== */
+/* =====================================================================
+   LOCALISATION — pour trier les fiches par proximité. Best-effort : si
+   l'utilisateur refuse ou que la géoloc échoue, on garde l'ordre du CSV.
+   ===================================================================== */
+let userPos = null;
+function requestGeolocation(){
+  return new Promise(resolve=>{
+    if(!navigator.geolocation){ resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => { userPos = {lat:pos.coords.latitude, lng:pos.coords.longitude}; resolve(userPos); },
+      ()  => resolve(null),
+      {enableHighAccuracy:false, timeout:8000, maximumAge:5*60*1000}
+    );
+  });
+}
+function haversineKm(lat1,lng1,lat2,lng2){
+  const R=6371, toRad = x=>x*Math.PI/180;
+  const dLat=toRad(lat2-lat1), dLng=toRad(lng2-lng1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.sqrt(a));
+}
+function sortByDistance(list){
+  if(!userPos) return list.map(t=>({t, dist:null}));
+  return list.map(t=>({t, dist:haversineKm(userPos.lat,userPos.lng,t.lat,t.lng)}))
+             .sort((a,b)=>a.dist-b.dist);
+}
+function fmtDist(km){
+  if(km==null) return '';
+  return km < 1 ? `${Math.round(km*1000)} m` : `${km.toFixed(1)} km`;
+}
+
 const map = L.map('map', {zoomControl:false}).setView([45.5301, -73.6000], 12);
 L.control.zoom({position:'topright'}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -554,6 +606,36 @@ map.on('movestart', ()=>{ if(!isProgrammaticMove) mapUserMoved = true; });
 let markers = {};
 let activeSport = 'soccer';
 let selectedId = null;
+
+// vue mobile : 'map' | 'list' | 'detail' — sur desktop ces classes n'ont aucun effet (voir CSS)
+let mobileView = 'map';
+let mobileLastView = 'map';
+function applyMobileView(){
+  const sidebar = document.getElementById('sidebar');
+  const mapEl = document.getElementById('map');
+  const showSidebar = (mobileView === 'list' || mobileView === 'detail');
+  sidebar.classList.toggle('mobile-open', showSidebar);
+  mapEl.classList.toggle('mobile-hidden', showSidebar);
+  const tabMap = document.getElementById('tabMap');
+  const tabList = document.getElementById('tabList');
+  if(tabMap) tabMap.classList.toggle('active', mobileView==='map');
+  if(tabList) tabList.classList.toggle('active', mobileView==='list');
+  if(!showSidebar) setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} }, 50); // la carte redevient visible : recalcule sa taille
+}
+window.setMobileTab = function(view){
+  mobileView = view;
+  mobileLastView = view;
+  selectedId = null;
+  if(view==='list') showList();
+  applyMobileView();
+};
+function goBackFromDetail(){
+  selectedId = null;
+  mobileView = mobileLastView; // revient à l'onglet actif avant l'ouverture de la fiche (carte ou liste, sans effet sur desktop)
+  showList();
+  applyMobileView();
+}
+window.goBackFromDetail = goBackFromDetail;
 
 function pinIcon(status, fresh){
   return L.divIcon({
@@ -642,10 +724,21 @@ function renderReservationRow(t){
   return `<div class="section"><h3>Réservation de permis</h3>${inner}</div>`;
 }
 
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function linkify(text){
+  return escapeHtml(text).replace(/(https?:\/\/[^\s<]+)/g, url =>
+    `<a href="${url}" target="_blank" rel="noopener" style="color:var(--floodlight);word-break:break-all;">${url}</a>`
+  );
+}
+
 function openDetail(id){
   selectedId = id;
   const t = TERRAINS.find(x=>x.id===id);
   if(!t) return;
+  if(mobileView !== 'detail') mobileLastView = mobileView; // se souvenir d'où revenir
+  mobileView = 'detail';
   const eff = effectiveStatus(t);
   const nm = nowMin();
   const nowStr = fmtMin(nm);
@@ -662,9 +755,9 @@ function openDetail(id){
   if(t.notes){
     const short = t.notes.length > 90 ? t.notes.slice(0,90) + '…' : t.notes;
     notesHtml = t.notes.length > 90
-      ? `<div class="notes-box" id="notesShort-${t.id}">${short} <span class="notes-toggle" onclick="document.getElementById('notesShort-${t.id}').style.display='none';document.getElementById('notesFull-${t.id}').style.display='block';">Voir plus</span></div>
-         <div class="notes-box" id="notesFull-${t.id}" style="display:none;">${t.notes}</div>`
-      : `<div class="notes-box">${t.notes}</div>`;
+      ? `<div class="notes-box" id="notesShort-${t.id}">${escapeHtml(short)} <span class="notes-toggle" onclick="document.getElementById('notesShort-${t.id}').style.display='none';document.getElementById('notesFull-${t.id}').style.display='block';">Voir plus</span></div>
+         <div class="notes-box" id="notesFull-${t.id}" style="display:none;">${linkify(t.notes)}</div>`
+      : `<div class="notes-box">${linkify(t.notes)}</div>`;
   }
 
   const nextSlotIn30 = fmtMin(Math.min(23*60+59, nm + 30));
@@ -695,7 +788,7 @@ function openDetail(id){
 
   document.getElementById('sidebar').innerHTML = `
     <div class="detail">
-      <button class="back-btn" onclick="showList()">← Retour à la liste</button>
+      <button class="back-btn" onclick="goBackFromDetail()">← Retour</button>
       ${imgHtml}
       <div class="detail-name">${t.name}</div>
       <div class="detail-status s-${eff.status}">
@@ -717,11 +810,14 @@ function openDetail(id){
       ${notesHtml ? `<div class="section"><h3>Détails</h3>${notesHtml}</div>` : ''}
     </div>
   `;
-  document.getElementById('sidebar').classList.add('mobile-open'); // mobile : la fiche prend tout l'écran
-  isProgrammaticMove = true;
-  map.setView([t.lat, t.lng], 15);
-  isProgrammaticMove = false;
-  openMiniPopup(t);
+  applyMobileView();
+  const mapVisible = !document.getElementById('map').classList.contains('mobile-hidden');
+  if(mapVisible){
+    isProgrammaticMove = true;
+    map.setView([t.lat, t.lng], 15);
+    isProgrammaticMove = false;
+    openMiniPopup(t);
+  }
 }
 window.openDetail = openDetail;
 window.selectTerrain = (id)=>{ openDetail(id); };
@@ -751,10 +847,21 @@ function renderFilters(){
       ${s.label}${!s.enabled?' · bientôt':''}
     </div>
   `).join('');
-}
-window.setSport = (id)=>{ activeSport = id; showList(); render(); };
 
-function currentList(){ return TERRAINS.filter(t=>t.sport===activeSport); }
+  const sel = document.getElementById('mobileSportSelect');
+  if(sel){
+    sel.innerHTML = SPORTS.map(s=>`
+      <option value="${s.id}" ${s.id===activeSport?'selected':''} ${!s.enabled?'disabled':''}>${s.label}${!s.enabled?' (bientôt)':''}</option>
+    `).join('');
+  }
+}
+window.setSport = (id)=>{ activeSport = id; selectedId = null; showList(); applyMobileView(); render(); };
+
+function currentList(){
+  const list = TERRAINS.filter(t=>t.sport===activeSport);
+  if(!userPos) return list;
+  return sortByDistance(list).map(x=>x.t);
+}
 
 function showList(){
   selectedId = null;
@@ -767,7 +874,6 @@ function showList(){
     <div class="list-body" id="listBody"></div>
   `;
   renderListBody(list);
-  document.getElementById('sidebar').classList.remove('mobile-open'); // mobile : retour à la carte plein écran
 }
 window.showList = showList;
 
@@ -776,6 +882,7 @@ function renderListBody(list){
   if(!body) return;
   body.innerHTML = list.map(t=>{
     const eff = effectiveStatus(t);
+    const d = userPos ? haversineKm(userPos.lat, userPos.lng, t.lat, t.lng) : null;
     return `
       <div class="card" onclick="selectTerrain('${t.id}')">
         <div class="card-top">
@@ -784,6 +891,7 @@ function renderListBody(list){
         </div>
         <div class="card-meta">
           <span>${t.addr}</span>
+          ${d!==null ? `<span>${fmtDist(d)}</span>` : ''}
         </div>
       </div>
     `;
@@ -835,6 +943,8 @@ function render(){
 (async function start(){
   await loadTerrainsFromCSV();
   showList();
+  applyMobileView();
+  requestGeolocation().then(()=> render()); // re-tri dès que la position est connue
   await loadCommunityData(); // appelle déjà render()
 })();
 setInterval(render, 30000);
