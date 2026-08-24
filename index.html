@@ -224,9 +224,11 @@
   #loadError{display:none;background:var(--occupe);color:#fff;font-size:12.5px;padding:8px 22px;font-family:'IBM Plex Mono',monospace;}
 
   @media (max-width:820px){
-    main.split{flex-direction:column;}
-    #map{flex:none;height:44vh;}
-    aside.list{width:100%;border-left:none;border-top:1px solid var(--line);flex:1;}
+    main.split{position:relative;}
+    aside.list{display:none;}
+    aside.list.mobile-open{
+      display:flex; position:absolute; inset:0; z-index:25; width:100%; height:100%; border:none;
+    }
     .scoreboard{left:8px;bottom:8px;padding:8px 10px;gap:10px;flex-wrap:wrap;max-width:210px;}
     .top-meta{display:none;}
   }
@@ -372,30 +374,60 @@ function todaysDbSlots(t){
    STOCKAGE COMMUNAUTAIRE (partagé) — réservations (couvre aussi
    l'occupation immédiate : il suffit de réserver à partir de "maintenant")
    ===================================================================== */
+/* =====================================================================
+   STOCKAGE — utilise window.storage (aperçu Claude, partagé entre
+   appareils) quand disponible ; sinon bascule automatiquement sur
+   localStorage (fonctionne une fois le site déployé, mais reste propre
+   à cet appareil/navigateur — pas de partage entre joueurs dans ce cas).
+   ===================================================================== */
+const hasCloudStorage = (typeof window.storage !== 'undefined');
+function lsKey(key, shared){ return (shared ? 'shared:' : 'local:') + key; }
+
+async function storageGet(key, shared){
+  if(hasCloudStorage){ try{ return await window.storage.get(key, shared); }catch(e){ return null; } }
+  try{ const raw = localStorage.getItem(lsKey(key,shared)); return raw!==null ? {value:raw} : null; }catch(e){ return null; }
+}
+async function storageSet(key, value, shared){
+  if(hasCloudStorage){ try{ return await window.storage.set(key, value, shared); }catch(e){ return null; } }
+  try{ localStorage.setItem(lsKey(key,shared), value); return {value}; }catch(e){ return null; }
+}
+async function storageDelete(key, shared){
+  if(hasCloudStorage){ try{ return await window.storage.delete(key, shared); }catch(e){ return null; } }
+  try{ localStorage.removeItem(lsKey(key,shared)); }catch(e){}
+}
+async function storageList(prefix, shared){
+  if(hasCloudStorage){ try{ return await window.storage.list(prefix, shared); }catch(e){ return {keys:[]}; } }
+  try{
+    const marker = lsKey(prefix, shared).replace(prefix,''); // "local:" ou "shared:"
+    const keys = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.startsWith(marker) && k.slice(marker.length).startsWith(prefix)) keys.push(k.slice(marker.length));
+    }
+    return {keys};
+  }catch(e){ return {keys:[]}; }
+}
+
 let bookings = {};      // terrainId -> [{id,start,end,players,ts}]
 let myBookings = new Set(); // clés "terrainId|bookingId" créées depuis cette session
 
 async function loadMyBookings(){
-  try{
-    const r = await window.storage.get('my-bookings', false);
-    if(r && r.value) myBookings = new Set(JSON.parse(r.value));
-  }catch(e){}
+  const r = await storageGet('my-bookings', false);
+  if(r && r.value){ try{ myBookings = new Set(JSON.parse(r.value)); }catch(e){} }
 }
 async function saveMyBookings(){
-  try{ await window.storage.set('my-bookings', JSON.stringify([...myBookings]), false); }catch(e){}
+  await storageSet('my-bookings', JSON.stringify([...myBookings]), false);
 }
 
 async function loadCommunityData(){
   await loadMyBookings();
-  try{
-    const bookKeys = (await window.storage.list('bookings:', true))?.keys || [];
-    for(const k of bookKeys){
-      try{
-        const r = await window.storage.get(k, true);
-        if(r && r.value) bookings[k.replace('bookings:','')] = JSON.parse(r.value) || [];
-      }catch(e){}
+  const bookKeys = (await storageList('bookings:', true))?.keys || [];
+  for(const k of bookKeys){
+    const r = await storageGet(k, true);
+    if(r && r.value){
+      try{ bookings[k.replace('bookings:','')] = JSON.parse(r.value) || []; }catch(e){}
     }
-  }catch(e){}
+  }
   render();
 }
 
@@ -426,7 +458,7 @@ async function addBooking(terrainId, startStr, endStr, players){
   }
   const entry = {id: 'b'+Date.now(), start:startStr, end:endStr, players: Math.min(players, capacity), ts: Date.now()};
   const list = bookings[terrainId] = existing.concat(entry);
-  try{ await window.storage.set('bookings:'+terrainId, JSON.stringify(list), true); }catch(e){}
+  await storageSet('bookings:'+terrainId, JSON.stringify(list), true);
   myBookings.add(terrainId+'|'+entry.id);
   await saveMyBookings();
   render();
@@ -437,7 +469,7 @@ window.addBooking = addBooking;
 async function deleteBooking(terrainId, bookingId){
   const list = (bookings[terrainId]||[]).filter(b=>b.id!==bookingId);
   bookings[terrainId] = list;
-  try{ await window.storage.set('bookings:'+terrainId, JSON.stringify(list), true); }catch(e){}
+  await storageSet('bookings:'+terrainId, JSON.stringify(list), true);
   myBookings.delete(terrainId+'|'+bookingId);
   await saveMyBookings();
   render();
@@ -685,6 +717,7 @@ function openDetail(id){
       ${notesHtml ? `<div class="section"><h3>Détails</h3>${notesHtml}</div>` : ''}
     </div>
   `;
+  document.getElementById('sidebar').classList.add('mobile-open'); // mobile : la fiche prend tout l'écran
   isProgrammaticMove = true;
   map.setView([t.lat, t.lng], 15);
   isProgrammaticMove = false;
@@ -734,6 +767,7 @@ function showList(){
     <div class="list-body" id="listBody"></div>
   `;
   renderListBody(list);
+  document.getElementById('sidebar').classList.remove('mobile-open'); // mobile : retour à la carte plein écran
 }
 window.showList = showList;
 
