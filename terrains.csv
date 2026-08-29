@@ -1,6 +1,251 @@
-id,name,addr,lat,lng,sport,format,capacity,surface,reservable,reserveUrl,photo_url,status,reserved_slots,notes,embed_url
-MTL1,Miniterrain de soccer Saint-Alexandre,"1205 rue Saint-Alexandre, Montréal, QC",45.50502,-73.566628,soccer,5v5,10,Béton,Non,,MTL1.png,libre,,,
-MTL2,Terrain de soccer du parc Ignace-Bourget,"5925 avenue de Montmagny, Montréal, QC H4E 2V6",45.454862,-73.604644,soccer,"11v11, 9v9, 7v7",22,Gazon,Oui,mailto:reservation-multisports@asbm.ca,MTL2.png,libre,"Lun,18:00,21:00,2026-05-17,2026-09-17,occupe,Réservé — ASSOM|Mer,18:00,21:00,2026-05-17,2026-09-17,occupe,Réservé — ASSOM|Jeu,18:30,21:00,2026-05-17,2026-09-17,occupe,Réservé — ASSOM|Ven,18:30,21:00,2026-05-17,2026-09-17,occupe,Réservé — ASSOM|Mar,18:00,20:00,2026-05-17,2026-09-30,occupe,Réservé — Montréal Futsal Club|Sam,08:00,10:00,2026-05-17,2026-09-30,occupe,Réservé — Montréal Futsal Club",Réservé par l'ASSOM et le Montréal Futsal Club à certaines heures ; jeu libre le reste du temps.,
-MTL3,Terrain de soccer du parc La Fontaine,"1450 Rue Rachel E, Montréal, QC H2J 2K3",45.528922,-73.568975,soccer,7v7,14,Synthétique,Oui,mailto:reservation-multisports@asbm.ca,MTL3.png,libre,"Lun,17:00,20:00,,,libre,Jeu libre — enfants/jeunes|Mer,17:00,20:00,,,libre,Jeu libre — enfants/jeunes|Ven,17:00,20:00,,,libre,Jeu libre — enfants/jeunes|Sam,17:00,20:00,,,libre,Jeu libre — enfants/jeunes|Lun-Dim,09:00,17:00,,,signale,Priorité aux permis — enfants/jeunes|Mar,17:00,20:00,,,signale,Priorité aux permis — enfants/jeunes|Jeu,17:00,20:00,,,signale,Priorité aux permis — enfants/jeunes|Mer,20:00,23:00,,,libre,Jeu libre — adultes|Ven,20:00,23:00,,,libre,Jeu libre — adultes|Sam,20:00,23:00,,,libre,Jeu libre — adultes|Lun,20:00,23:00,,,signale,Priorité aux permis — adultes|Mar,20:00,23:00,,,signale,Priorité aux permis — adultes|Jeu,20:00,23:00,,,signale,Priorité aux permis — adultes|Dim,20:00,23:00,,,signale,Priorité aux permis — adultes",Ouvert de 7h à 23h tous les jours. Priorité aux détenteurs de permis à certaines heures (voir horaires du jour).,
-MTL4,Terrain de soccer du parc Sir-Wilfrid-Laurier,"Avenue Laurier Est, Montréal, QC H2J 3L8",45.533083,-73.588639,soccer,"11v11, 9v9, 7v7",22,Gazon,Oui,mailto:reservation-multisports@asbm.ca,MTL4.png,libre,"Mar,16:00,18:00,,,signale,Priorité jeunes du quartier|Mer,16:00,18:00,,,signale,Priorité jeunes du quartier|Jeu,16:00,18:00,,,signale,Priorité jeunes du quartier|Sam,16:00,19:00,,,signale,Priorité jeunes du quartier|Jeu,18:00,22:00,,,libre,Jeu libre — tous|Sam,19:00,22:00,,,libre,Jeu libre — tous|Dim,12:00,18:00,,,libre,Jeu libre — tous",Priorité aux jeunes du quartier à certaines heures ; pratique libre pour tous le reste du temps. Les groupes avec permis officiel ont priorité en tout temps.,
-MTL5,Terrain de soccer du parc Toussaint-Louverture,"260 Boul. de Maisonneuve E, Montréal, QC H2X 1J7",45.512313,-73.564326,soccer,7v7,14,Synthétique,Oui,mailto:reservation-multisports@asbm.ca,MTL5.png,libre,,Selon calendrier en ligne partagé : https://calendar.splextech.com/?locale=FR&configurationId=80e98e2b-0093-46bf-a978-ef6ad071bd53&regionId=0aac6b51-e5cf-41ad-b359-d088d787797a&surfaceId=2ca94346-b1b7-4d89-9854-6ccfb660e2a5&initialDate=2026-08-17,
+id,name,addr,lat,lng,sport,format,capacity,surface,access,reserveUrl,montrealUrl,photo_url,status,reserved_slots,notes
+MTL1,Miniterrain de soccer Saint-Alexandre,"1205 rue Saint Alexandre, Montréal (Québec)",45.50502,-73.566628,soccer,5v5,10,Béton,Accès libre,,https://montreal.ca/lieux/miniterrain-de-soccer-saint-alexandre,MTL1.png,libre,,NA
+MTL2,Terrain de soccer du parc Ignace-Bourget,"5925, avenue de Montmagny, Montréal (Québec) H4E 2V6",45.454862,-73.604644,soccer,"11v11, 9v9, 7v7",22,Gazon,Réservable,mailto:reservation-multisports@asbm.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-ignace-bourget,MTL2.png,libre,"Lun,18:00,21:00,2026-05-17,2026-09-17,occupe,Réservé — ASSOM|Mer,18:00,21:00,2026-05-17,2026-09-17,occupe,Réservé — ASSOM|Jeu,18:30,21:00,2026-05-17,2026-09-17,occupe,Réservé — ASSOM|Ven,18:30,21:00,2026-05-17,2026-09-17,occupe,Réservé — ASSOM|Mar,18:00,20:00,2026-05-17,2026-09-30,occupe,Réservé — Montréal Futsal Club|Sam,08:00,10:00,2026-05-17,2026-09-30,occupe,Réservé — Montréal Futsal Club","Reservé: ASSOM
+Activités de soccer du 17 mai au 17 septembre les lundis 18h à 21h, les mercredis 18h à 21h, les jeudis 18 h 30 à 21 h les vendredis 18h 30 à 21h.
+Reservé: Montréal Futsal Club
+Activité de futsal du 17 mai au 30 septembre les mardis 18h à 20h, les samedis de 8h à 10h.
+Libre: Jeudi: 16 h 00 à 18 h 00, Vendredi: 17 h 00 à 18 h 00, Samedi:10 h 00 à 14 h 00"
+MTL3,Terrain de soccer du parc La Fontaine,"1450 Rue Rachel E, Montréal, QC H2J 2K3",45.528922,-73.568975,soccer,7v7,14,Synthétique,Réservable,mailto:reservation-multisports@asbm.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-la-fontaine,MTL3.png,libre,"Lun,17:00,20:00,,,libre,Jeu libre — enfants/jeunes|Mer,17:00,20:00,,,libre,Jeu libre — enfants/jeunes|Ven,17:00,20:00,,,libre,Jeu libre — enfants/jeunes|Sam,17:00,20:00,,,libre,Jeu libre — enfants/jeunes|Lun-Dim,09:00,17:00,,,signale,Priorité aux permis — enfants/jeunes|Mar,17:00,20:00,,,signale,Priorité aux permis — enfants/jeunes|Jeu,17:00,20:00,,,signale,Priorité aux permis — enfants/jeunes|Mer,20:00,23:00,,,libre,Jeu libre — adultes|Ven,20:00,23:00,,,libre,Jeu libre — adultes|Sam,20:00,23:00,,,libre,Jeu libre — adultes|Lun,20:00,23:00,,,signale,Priorité aux permis — adultes|Mar,20:00,23:00,,,signale,Priorité aux permis — adultes|Jeu,20:00,23:00,,,signale,Priorité aux permis — adultes|Dim,20:00,23:00,,,signale,Priorité aux permis — adultes","Ouvert de 7h à 23h tous les jours avec jeu libre
+Pour les enfants et les jeunes
+Jeu libre seulement (aucune réservation) : les lundis, mercredis, vendredis et samedis, de 17 h à 20 h.
+Jeu libre ou organisé (priorité aux permis) : du lundi au dimanche de 9 h à 17 h, ainsi que les mardis et jeudis de 17 h à 20 h.
+Camps de jour : les camps de jour estivaux et les organismes détenant un permis ont toujours la priorité sur le terrain le jour. Si le terrain est libre, vous pouvez l'utiliser.
+Pour les adultes
+Jeu libre seulement (aucune réservation) : les mercredis, vendredis et samedis, de 20 h à 23 h.
+Jeu libre ou organisé (priorité aux permis) : les lundis, mardis, jeudis et dimanches, de 20 h à 23 h. Les ligues et organismes détenant un permis ont la priorité lors de ces plages horaires."
+MTL4,Terrain de soccer du parc Sir-Wilfrid-Laurier,"Avenue Laurier Est, Montréal, QC H2J 3L8",45.533083,-73.588639,soccer,,,Gazon,Réservable,mailto:reservation-multisports@asbm.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-sir-wilfrid-laurier,MTL4.png,libre,"Mar,16:00,18:00,,,signale,Priorité jeunes du quartier|Mer,16:00,18:00,,,signale,Priorité jeunes du quartier|Jeu,16:00,18:00,,,signale,Priorité jeunes du quartier|Sam,16:00,19:00,,,signale,Priorité jeunes du quartier|Jeu,18:00,22:00,,,libre,Jeu libre — tous|Sam,19:00,22:00,,,libre,Jeu libre — tous|Dim,12:00,18:00,,,libre,Jeu libre — tous","Priorité aux jeunes
+Pendant ces plages horaires, le terrain est réservé en priorité aux jeunes du quartier :
+Les mardis, mercredis et jeudis, de 16 h à 18 h.
+Les samedis, de 16 h à 19 h.
+Pratique libre pour toutes et tous
+Ces périodes sont ouvertes à l'ensemble de la population pour du jeu libre :
+Les jeudis, de 18 h à 22 h.
+Les samedis, de 19 h à 22 h.
+Les dimanches, de 12 h à 18 h.
+Rappel : en tout temps, les groupes ou organismes qui détiennent un permis officiel ont la priorité sur le terrain."
+MTL5,Terrain de soccer du parc Toussaint-Louverture,"260 Boul. de Maisonneuve E, Montréal, QC H2X 1J7",45.512313,-73.564326,soccer,7v7,14,Synthétique,Réservable,mailto:reservation-multisports@asbm.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-toussaint-louverture,MTL5.png,libre,,Selon calendrier en ligne partagé https://calendar.splextech.com/?locale=FR&configurationId=80e98e2b-0093-46bf-a978-ef6ad071bd53&regionId=0aac6b51-e5cf-41ad-b359-d088d787797a&surfaceId=2ca94346-b1b7-4d89-9854-6ccfb660e2a5&initialDate=2026-08-17
+MTL6,Stade de soccer de Montréal,"9235 Av. Papineau, Montréal, QC H2M 2C9",45.563235,-73.638156,soccer,"11v11, 9v9, 7v7",22,Synthétique,Réservation obligatoire,mailto:stadedesoccer@montreal.ca,https://montreal.ca/lieux/stade-de-soccer-de-montreal,,libre,,"Lundi
+15 h 30 à 23 h 00
+Mardi
+15 h 30 à 23 h 00
+Mercredi
+15 h 30 à 23 h 00
+Jeudi
+15 h 30 à 23 h 00
+Vendredi
+15 h 30 à 23 h 00
+Samedi
+8 h 00 à 23 h 30
+Dimanche
+8 h 00 à 23 h 00"
+MTL7,Dôme Hébert,"7655, rue Colbert, Montréal (Québec) H1S 2Y7",45.574019,-73.592999,soccer,,,Synthétique,Réservation obligatoire,tel:+15147292708,https://montreal.ca/lieux/dome-hebert,,libre,,Horaire non indiqué sur la fiche. Vérifier la disponibilité auprès du Stade Hébert.
+MTL8,Stade Hébert,"7655, rue Colbert, Montréal (Québec) H1S 2Y7",45.574019,-73.592999,soccer,,,Synthétique,Réservation obligatoire,tel:+15147292708,https://montreal.ca/lieux/stade-hebert,,libre,,Horaire non indiqué sur la fiche. Réservation d’une plage horaire par téléphone.
+MTL9,Terrain de soccer du complexe sportif de Saint-Laurent,"2385, boulevard Thimens, Montréal (Québec) H4R 1T4",45.507776,-73.703346,soccer,,,Synthétique,Réservation obligatoire,https://loisirs.montreal.ca/IC3/#/U2010,https://montreal.ca/lieux/terrain-de-soccer-du-complexe-sportif-de-saint-laurent,,libre,,"Horaire pour la période du 9 janvier 2026 au 8 mai 2027
+Pour les jeunes (de 12 à 17 ans)
+Vendredi	16 h 00 à 17 h 55
+Samedi	16 h 30 à 17 h 55"
+MTL10,Terrain de soccer du parc Adrien-D.-Archambault,"1000, boulevard de la Forêt, Montréal (Québec) H3E 1X9",45.455827,-73.557595,soccer,,,Gazon,Réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-adrien-d-archambault,,libre,,9 h–23 h; priorité aux permis
+MTL11,Terrain de soccer du parc Alexander,"14899, rue Oakwood, Montréal (Québec) H9H 1Y1",45.475496,-73.857433,soccer,11v11,22,Gazon,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-alexander,,libre,,6 h–23 h; accès si aucune activité
+MTL12,Terrain de soccer du parc André-Laurendeau,"8361, avenue André-Laurendeau, Montréal (Québec) H1J 2H5",45.605347,-73.571327,soccer,"5v5, 7v7",14,Gazon,Réservable,mailto:loisirs.anjou@montreal.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-andre-laurendeau,,libre,,2x 5v5 + 2x 7v7; priorité aux permis
+MTL13,Terrain de soccer du parc Beurling,"6001, rue Beurling, Montréal (Québec)",45.447488,-73.584524,soccer,,,Gazon,Réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-beurling,,libre,,7 h–23 h lun-ven; 7 h–22 h sam-dim; priorité aux permis
+MTL14,Terrain de soccer du parc Bishop-Whelan,"Rue René Huguet, Montréal (Québec) H8T 1M7",45.442367,-73.71325,soccer,,,Gazon,Réservation obligatoire,mailto:loisirslachine@montreal.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-bishop-whelan,,libre,,Hors heures de classe; 18 h–23 h semaine scolaire; 9 h–23 h week-end; été 6 h–23 h
+MTL15,Terrain de soccer du parc Carignan,"4100, rue Provost, Montréal (Québec) H8T 3J6",45.443152,-73.702048,soccer,,,Gazon,Réservation obligatoire,mailto:loisirslachine@montreal.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-carignan,,libre,,15 avril–31 octobre; 6 h–23 h; selon météo
+MTL16,Terrain de soccer du parc Arthur-Therrien,"3750, boulevard Gaétan-Laberge, Montréal (Québec)",45.466616,-73.560797,soccer,,,Gazon,Réservation obligatoire,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-arthur-therrien,,libre,,7h 23h
+MTL17,Terrain de soccer du parc Campbell Ouest,"1990, rue de Maricourt, Montréal (Québec) H4E 1V9",45.457907,-73.589811,soccer,,,Gazon,Réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-campbell-ouest,,libre,,Ouvert mi-mai à mi-octobre; soccer libre en tout temps selon horaires du parc
+MTL18,Terrain de soccer du parc Catherine-Soumillard,"48e Avenue, Montréal (Québec) H8T 2R8",45.440287,-73.708257,soccer,,,Gazon,Réservation obligatoire,mailto:loisirslachine@montreal.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-catherine-soumillard,,libre,,Hors heures de classe; 18 h–23 h semaine; 9 h–23 h week-end; été 6 h–23 h
+MTL20,Terrain de soccer du parc Coubertin,"4755, rue Valéry, Montréal (Québec) H1R 1H9",45.584465,-73.608551,soccer,,,Gazon,Réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-coubertin,,libre,,6h 23h
+MTL21,Terrain de soccer du parc d'À-Ma-Baie,"9625, boulevard Gouin Ouest, Montréal (Québec)",45.504814,-73.783694,soccer,9v9,18,Gazon,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-da-ma-baie,,libre,,6 h–23 h
+MTL23,Terrain de soccer du parc de Deauville,"Rue de Riva-Bella, Montréal (Québec) H9K 1R9",45.464692,-73.891025,soccer,5v5,10,Gazon,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-de-deauville,,libre,,6 h–23 h
+MTL24,Terrain de soccer du parc de l'École secondaire de la Pointe-aux-Trembles,"15180, rue Sherbrooke Est, Montréal (Québec) H1A 3P9",45.683908,-73.494571,soccer,11v11,22,Synthétique,Réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-de-lecole-secondaire-de-la-pointe-aux-trembles,,libre,,6h-23h
+MTL25,Terrain de soccer du parc de l'Honorable-George-O'Reilly,"7523, boulevard LaSalle, Montréal (Québec) H4H 1R4",45.435443,-73.584535,soccer,,,Gazon,Réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-de-lhonorable-george-oreilly,,libre,,7 h–22 h
+MTL26,Terrain de soccer du parc de la Louisiane,"4644, rue Beaubien Est, Montréal (Québec) H1T 1T7",45.567467,-73.572604,soccer,,,,Réservable,mailto:reservation-multisports@asbm.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-de-la-louisiane,,libre,,Non renseigné
+MTL27,Terrain de soccer du parc de la Reine-Élizabeth,"1650 Rue Crawford, Montréal (Québec) H4H 2H8",45.438023,-73.593148,soccer,,,Gazon,Réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-de-la-reine-elizabeth,,libre,,7 h–23 h lun-ven; 7 h–21 h sam-dim; priorité aux permis
+MTL28,Terrain de soccer du parc de la Rive-Boisée,"307, chemin de la Rive-Boisée, Montréal (Québec) H8Z 3M2",45.675902,-73.498259,soccer,11v11,22,Gazon,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-de-la-rive-boisee,,libre,,6h-23h
+MTL29,Terrain de soccer du parc de Louisbourg,"5455, rue de Louisbourg, Montréal (Québec) H4J 1K8",45.529179,-73.707208,soccer,,,Synthétique,Réservable,mailto:reservation-multisports@asbm.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-de-louisbourg,,libre,,6 h–23 h; Selon calendrier en ligne partagé: https://calendar.splextech.com/?locale=FR&configurationId=6ba9df1b-eb56-48fb-befc-52e1136323b3&surfaceTypeId=1a012035-6e3b-4888-bdf7-a8e388378b6e&surfaceId=fbc19e4a-783e-4363-8847-785495e284bd&initialDate=2026-04-20
+MTL30,Terrain de soccer du parc de Montmartre,"rue De Montigny et 60e Avenue, Montréal (Québec) H1A 1L9",45.675902,-73.498259,soccer,7v7,14,Gazon,Réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-de-montmartre,,libre,,6h-23h
+MTL31,Terrain de soccer du parc de Roxboro,"10, 11e Rue, Montréal (Québec) H8Y 2P4",45.505899,-73.802833,soccer,9v9,18,Gazon,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-de-roxboro,,libre,,6 h–23 h
+MTL32,Terrain de soccer du parc de Talcy,"8151, avenue de Talcy, Montréal (Québec)",45.607199,-73.560287,soccer,7v7,14,Gazon,Réservable,mailto:cca@montreal.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-de-talcy,,occupe,,Fermé en 2026 pour travaux ligne bleue
+MTL33,Terrain de soccer du parc des Hirondelles,"2601, rue Sauvé Est, Montréal (Québec) H2B 1L5",45.575962,-73.644906,soccer,"11v11, 7v7",22,Synthétique,Réservable,mailto:reservation-multisports@asbm.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-des-hirondelles,,libre,,6 h–23 h; Selon calendrier en ligne partagé: https://calendar.splextech.com/?locale=FR&configurationId=6ba9df1b-eb56-48fb-befc-52e1136323b3&surfaceTypeId=1a012035-6e3b-4888-bdf7-a8e388378b6e&surfaceId=fbc19e4a-783e-4363-8847-785495e284bd&initialDate=2026-04-20
+MTL34,Terrain de soccer du parc des Roseraies,"7070, avenue de la Nantaise, Montréal (Québec) H1M 1B2",45.593345,-73.555536,soccer,5v5,10,Gazon,Réservable,mailto:loisirs.anjou@montreal.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-des-roseraies,,libre,,
+MTL35,Terrain de soccer du parc Dixie,"695, 54e Avenue, Montréal (Québec) H8T 3A2",45.442768,-73.718205,soccer,,,Gazon,Réservation obligatoire,mailto:loisirslachine@ville.montreal.qc.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-dixie,,libre,,15 avril–31 octobre; 6 h–23 h
+MTL36,Terrain de soccer du parc Dollard-Morin,"11750, rue La Valinière, Montréal (Québec)",45.627335,-73.593622,soccer,7v7,14,Gazon,Réservation obligatoire,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-dollard-morin,,libre,,6 h–23 h
+MTL37,Terrain de soccer du parc du Boisé,"Rue du Boisé, Montréal (Québec)",45.502859,-73.793489,soccer,,,,Réservation obligatoire,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-du-boise,,libre,,6 h–23 h
+MTL38,Terrain de soccer du parc du Château-Pierrefonds,"boulevard de Pierrefonds, Montréal (Québec) H9K 1R1",45.45962,-73.894094,soccer,7v7; 5v5,14,Gazon,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-du-chateau-pierrefonds,,libre,,6 h–23 h
+MTL39,Terrain de soccer du parc du Molise,"8691, rue Rosario-Bayeur, Montréal (Québec)",45.642123,-73.581373,soccer,7v7,14,,Réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-du-molise,,libre,,
+MTL40,Terrain de soccer du parc du Perce-Neige,"Place Talbot, Montréal (Québec)",45.505475,-73.780835,soccer,,,,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-du-perce-neige,,libre,,6 h–23 h
+MTL41,Terrain de soccer du parc du Père-Marquette,"1602, rue de Bellechasse, Montréal (Québec)",45.539683,-73.592749,soccer,"11v11, 9v9, 7v7",22,Synthétique,Réservable,mailto:reservation-multisports@asbm.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-du-pere-marquette,,libre,,"Pratique libre
+Les terrains sportifs sont accessibles sans réservation aux plages horaires suivantes :
+
+Grand terrain de soccer
+Soccer libre (12 ans et plus) 
+Du 24 juin au 23 août
+Lundi au vendredi de 16 h 15 à 17 h 30
+
+Petit terrain de soccer
+Soccer familial 
+Du 18 avril au 15 novembre
+Samedi : de 14 h à 19 h 
+Dimanche : de 14 h à 17 h
+
+Soccer libre (12 ans et plus) 
+Du 18 avril au 15 novembre
+Samedi : de 19 h à 23 h
+Dimanche : de 19 h à 23 h
+
+À l'extérieur de ces plages horaires, les terrains sont réservés en priorité aux personnes ou groupe détenant de permis. 
+
+6 h à 20 h 30 : horaire du grand terrain
+6 h à 23 h : horaire du petit terrain"
+MTL42,Terrain de soccer du parc Duval,"Rue Atlas, Montréal (Québec) H9H 4J8",45.466272,-73.869203,soccer,7v7,14,Gazon,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-duval,,libre,,6 h–23 h
+MTL43,Terrain de soccer du parc-école Calixa-Lavallée,"4444, boulevard Henri-Bourassa Est, Montréal (Québec)",45.598368,-73.638071,soccer,,,,Réservation obligatoire,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-ecole-calixa-lavallee,,libre,,6 h–23 h
+MTL45,Terrain de soccer du parc-école Lakeside Academy,"Rue Sir George Simpson, Montréal (Québec)",45.447149,-73.7143,soccer,,,Gazon,Réservation obligatoire,mailto:loisirslachine@ville.montreal.qc.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-ecole-lakeside-academy,,libre,,"Horaire habituel
+28 août au 30 juin
+Lundi
+18 h 00 à 23 h 00
+Mardi
+18 h 00 à 23 h 00
+Mercredi
+18 h 00 à 23 h 00
+Jeudi
+18 h 00 à 23 h 00
+Vendredi
+18 h 00 à 23 h 00
+Samedi
+9 h 00 à 23 h 00
+Dimanche
+9 h 00 à 23 h 00
+Durant les vacances scolaires
+Horaire habituel d’été
+1 juillet au 27 août
+Lundi
+6 h 00 à 23 h 00
+Mardi
+6 h 00 à 23 h 00
+Mercredi
+6 h 00 à 23 h 00
+Jeudi
+6 h 00 à 23 h 00
+Vendredi
+6 h 00 à 23 h 00
+Samedi
+6 h 00 à 23 h 00
+Dimanche
+6 h 00 à 23 h 00"
+MTL47,Terrain de soccer du parc François-Perrault,"7525, rue François-Perrault, Montréal (Québec)",45.562638,-73.601572,soccer,,,Synthétique,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-francois-perrault,,libre,,"Soccer extérieur synthétique (pratique libre)
+Période du 11 mai au 7 septembre 2026 :
+
+Mardi, de 15h à 17h
+Jeudi, de 17h à 20h
+Samedi et dimanche, de 15h à 18h"
+MTL48,Terrain de soccer du parc Gabriel-Lalemant,"2244, rue Sauvé Est, Montréal (Québec)",45.569631,-73.642438,soccer,,,Gazon,Réservable,mailto:reservation-multisports@asbm.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-gabriel-lalemant,,libre,,Selon calendrier en ligne partagé https://calendar.splextech.com/?locale=FR&configurationId=6ba9df1b-eb56-48fb-befc-52e1136323b3&surfaceTypeId=1a012035-6e3b-4888-bdf7-a8e388378b6e&surfaceId=fbc19e4a-783e-4363-8847-785495e284bd&initialDate=2026-04-20
+MTL49,Terrain de soccer du parc George-Springate,"4788, rue Richmond, Montréal (Québec)",45.491067,-73.845471,soccer,"11v11, 7v7",22,Synthétique,Non réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-george-springate,,libre,,6 h–23 h
+MTL51,Terrain de soccer du parc Gilbert-Layton,"6975, avenue Chester, Montréal (Québec)",45.465873,-73.6513,soccer,,,Gazon,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-gilbert-layton,,libre,,6 h–23 h
+MTL52,Terrain de soccer du parc Giuseppe-Garibaldi,"7125, rue Liénart, Montréal (Québec)",45.588448,-73.570713,soccer,,,Gazon,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-giuseppe-garibaldi,,libre,,7h 23h
+MTL53,Terrain de soccer du parc Greendale,"Rue King, Montréal (Québec)",45.481078,-73.852637,soccer,5v5,10,,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-greendale,,libre,,6 h–23 h
+MTL54,Terrain de soccer du parc Grier,"4590, rue des Cageux, Montréal (Québec) H9J 3P9",45.458494,-73.88142,soccer,"11v11, 5v5",22,Synthétique,Accès libre,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-grier,,libre,,6 h–23 h
+MTL55,Terrain de soccer du parc Grovehill,"40, 36e Avenue, Montréal (Québec)",45.441488,-73.69413,soccer,,,Gazon,Réservable,mailto:loisirslachine@montreal.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-grovehill,,libre,,"Pour profiter de cette installation, vous devez réserver votre place par courriel ou par téléphone.
+
+Du soccer libre permet la pratique de ce sport sans réservation :
+
+Les lundis et mercredis, du 29 juin au 21 août 
+
+De 17 h à 19 h pour les 6-12 ans
+De 19 h à 21 h pour les 13-17 ans"
+MTL56,Terrain de soccer du parc Hartenstein,"1505, rue Cardinal, Montréal (Québec)",45.517238,-73.690568,soccer,,,,Réservation obligatoire,tel:+15148556110,https://montreal.ca/lieux/terrain-de-soccer-du-parc-hartenstein,,libre,,6 h–23 h
+MTL57,Terrain de soccer du parc Henri-Julien,"9300, rue Saint-Denis, Montréal (Québec)",45.547643,-73.651665,soccer,,,Synthétique,Réservable,mailto:reservation-multisports@asbm.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-henri-julien,,libre,,Selon calendrier en ligne partagé https://calendar.splextech.com/?locale=FR&configurationId=6ba9df1b-eb56-48fb-befc-52e1136323b3&surfaceTypeId=1a012035-6e3b-4888-bdf7-a8e388378b6e&surfaceId=f4c6504e-8823-4f3d-a400-acffe36c29a3&initialDate=2026-04-20
+MTL58,Terrain de soccer du parc Joe-Beef,"1659, rue Centre, Montréal (Québec) H3K 1G4",45.484515,-73.56012,soccer,7v7,14,Synthétique,Réservable,https://asbm.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-joe-beef,,libre,,
+MTL59,Terrain de soccer du parc Kirkland,"123, rue Léo-Pétrin, Montréal (Québec)",45.446539,-73.651536,soccer,,,Gazon,Réservation obligatoire,mailto:loisirslachine@montreal.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-kirkland,,libre,,"Pour profiter de cette installation, vous devez réserver votre place par courriel ou par téléphone.
+
+Du soccer libre est offert pour la pratique de ce sport sans réservation :
+
+Les jeudis, du 25 juin au 13 août
+
+de 18 h à 21 h : 6 à 17 ans
+de 21 h à 22 h : 18 ans et plus"
+MTL60,Terrain de soccer du parc Lacordaire,"12576, boulevard Lacordaire, Montréal (Québec)",45.616035,-73.632804,soccer,,,,Réservation obligatoire,mailto:reservationsmtln@montreal.ca,https://montreal.ca/lieux/terrain-de-soccer-du-parc-lacordaire,,libre,,"Tarifs - Terrains sportifs - 2026
+Organismes reconnus par l’arrondissement
+Gratuit
+Autres locataires
+62,00$
+Établissement Scolaires (CSSPI ET CSEM)
+Selon entente"
+MTL61,Terrain de soccer du parc Le Ber,"202, avenue Ash, Montréal (Québec)",45.476943,-73.554831,soccer,5v5,10,,Réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-le-ber,,libre,,"Loisirs & Culture Sud-Ouest (LCSO)
+
+Activités de soccer du 19 mai au 27 août 2023 les mercredis de 17 h 30 à 18 h 30 et les dimanches de 9 h à 12 h."
+MTL63,Terrain de soccer du parc Louis-Cyr,"167, rue Saint-Ferdinand, Montréal (Québec)",45.476121,-73.582004,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-louis-cyr,,libre,,"Arrondissement : Le Sud-Ouest
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL64,Terrain de soccer du parc Luigi-Pirandello,"4550, rue de Compiègne, Montréal (Québec)",45.578245,-73.604973,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-luigi-pirandello,,libre,,"Arrondissement : Saint-Léonard
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL65,Terrain de soccer du parc Macdonald,"5335, avenue Clanranald, Montréal (Québec)",45.484132,-73.636312,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-macdonald,,libre,,"Arrondissement : Côte-des-Neiges–Notre-Dame-de-Grâce
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL66,Terrain de soccer du parc Mackenzie-King,"4907, avenue Saint-Kevin, Montréal (Québec)",45.49042,-73.632696,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-mackenzie-king,,libre,,"Arrondissement : Côte-des-Neiges–Notre-Dame-de-Grâce
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL67,Terrain de soccer du parc Marcel-Laurin,"2345, boulevard Thimens, Montréal (Québec)",45.508694,-73.702391,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-marcel-laurin,,libre,,"Arrondissement : Saint-Laurent
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL68,Terrain de soccer du parc Marcelin-Wilson,"11301, boulevard de l'Acadie, Montréal (Québec)",45.537438,-73.684645,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-marcelin-wilson,,libre,,"Arrondissement : Ahuntsic-Cartierville
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL69,Terrain de soccer du parc Maria-Goretti,"488, 85e Avenue, Montréal (Québec)",45.691819,-73.487015,soccer,7v7,14,Gazon naturel,Réservable par permis,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-maria-goretti,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL70,Terrain de soccer du parc Marie-Claire-Daveluy,"12180, avenue Jean-Yves-Bigras, Montréal (Québec)",45.64918,-73.567733,soccer,7v7,14,Gazon naturel,Réservable par permis,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-marie-claire-daveluy,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL71,Terrain de soccer du parc Martin-Luther-King,"3453, avenue de Kent, Montréal (Québec)",45.504006,-73.631851,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-martin-luther-king,,libre,,"Arrondissement : Côte-des-Neiges–Notre-Dame-de-Grâce
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL72,Terrain de soccer du parc Noël-Nord,"2900, rue Baker, Montréal (Québec)",45.516701,-73.728516,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-noel-nord,,libre,,"Arrondissement : Saint-Laurent
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL74,Terrain de soccer du parc Pasquale-Gattuso,"11770, place Gilles-Trottier, Montréal (Québec)",45.635153,-73.575876,soccer,11v11,22,Synthétique,Réservable par permis,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-pasquale-gattuso,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL75,Terrain de soccer du parc Philippe-Laheurte,"3035, avenue Ernest-Hemingway, Montréal (Québec)",45.504318,-73.719385,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-philippe-laheurte,,libre,,"Arrondissement : Saint-Laurent
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL76,Terrain de soccer du parc Pie-XII,"5200, boulevard Lavoisier, Montréal (Québec)",45.58721,-73.608256,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-pie-xii,,libre,,"Arrondissement : Saint-Léonard
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL77,Terrain de soccer du parc Pierre-Blanchet,"12279, avenue Pierre-Blanchet, Montréal (Québec)",45.627965,-73.603535,soccer,7v7,14,Gazon naturel,Réservable par permis,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-pierre-blanchet,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL78,Terrain de soccer du parc Primeau,"10958, avenue Pelletier, Montréal (Québec)",45.592901,-73.635636,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-primeau,,libre,,"Arrondissement : Montréal-Nord
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL80,Terrain de soccer du parc René-Masson,"9175, boulevard Perras, Montréal (Québec)",45.652433,-73.578701,soccer,11v11,22,Synthétique,Réservable par permis,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-rene-masson,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL81,Terrain de soccer du parc Riverdale,"5060, boulevard des Sources, Montréal (Québec) H8Y 3E4",45.509807,-73.822852,soccer,9v9 + 11v11 + 4x5v5,22,Gazon,Non réservable,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-riverdale,,libre,,9v9 + 11v11 + 4x5v5; 6 h–23 h
+MTL82,Terrain de soccer du parc Roman-Zytynsky,"1555, boulevard Jules-Poitras, Montréal (Québec)",45.528412,-73.67882,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-roman-zytynsky,,libre,,"Arrondissement : Saint-Laurent
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL84,Terrain de soccer du parc Saint-André-Apôtre,"10550, avenue de l'Esplanade, Montréal (Québec)",45.546673,-73.67205,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-saint-andre-apotre,,libre,,"Arrondissement : Ahuntsic-Cartierville
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL87,Terrain de soccer du parc Saint-Marcel,"1647, 6e Avenue, Montréal (Québec)",45.639887,-73.507384,soccer,7v7,14,Synthétique,Réservable par permis,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-saint-marcel,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL91,Terrain de soccer du parc Victor-P.-Gray,"18e Avenue, Montréal (Québec)",45.498061,-73.80837,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-victor-p-gray,,libre,,"Arrondissement : Pierrefonds-Roxboro
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL92,Terrain de soccer du parc William-Bowie,"4955, avenue Trenholme, Montréal (Québec)",45.500934,-73.565362,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-du-parc-william-bowie,,libre,,"Arrondissement : Côte-des-Neiges–Notre-Dame-de-Grâce
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL96,Terrain de soccer intérieur du complexe sportif St-Jean-Vianney,"12640, boulevard Gouin Est, Montréal (Québec)",45.691621,-73.519654,soccer,,,,,,https://montreal.ca/lieux/terrain-de-soccer-interieur-du-complexe-sportif-st-jean-vianney,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL102,Terrains de soccer du parc Baldwin,"4355, rue Fullum, Montréal (Québec)",45.537337,-73.568381,soccer,,,,Réservable (priorité permis),,https://montreal.ca/lieux/terrains-de-soccer-du-parc-baldwin,,libre,,"Arrondissement : Le Plateau-Mont-Royal
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL103,Terrains de soccer du parc Beaubien d'Outremont,"Parc Beaubien d'Outremont, Montréal (Québec)",45.516359,-73.609642,soccer,9v9 + terrain multisport,18,Synthétique + naturel,Réservable (priorité permis),,https://montreal.ca/lieux/terrains-de-soccer-du-parc-beaubien-doutremont,,libre,,"Arrondissement : Outremont
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL104,Terrains de soccer du parc Champdoré,"2400, rue Champdoré, Montréal (Québec)",45.568286,-73.635894,soccer,,,,,,https://montreal.ca/lieux/terrains-de-soccer-du-parc-champdore,,libre,,"Arrondissement : Villeray–Saint-Michel–Parc-Extension
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL105,Terrains de soccer du parc Clifford,"1820, avenue Clifford, Montréal (Québec)",45.450255,-73.58973,soccer,,,,,,https://montreal.ca/lieux/terrains-de-soccer-du-parc-clifford,,libre,,"Arrondissement : Le Sud-Ouest
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL106,Terrains de soccer du parc Conrad-Poirier,"avenue Salomon-Marion et boulevard Perras, Montréal (Québec)",45.637321,-73.597538,soccer,2x7v7 + 11v11,22,Gazon naturel + synthétique,Réservable par permis,,https://montreal.ca/lieux/terrains-de-soccer-du-parc-conrad-poirier,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL108,Terrains de soccer du parc Dalbé-Viau,"rue Esther-Blondin et rue Duff Court, Montréal (Québec)",45.445019,-73.678766,soccer,,,,,,https://montreal.ca/lieux/terrains-de-soccer-du-parc-dalbe-viau,,libre,,"Arrondissement : Lachine
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL109,Terrains de soccer du parc Daniel-Johnson,"1500, boulevard du Tricentenaire, Montréal (Québec)",45.650664,-73.501418,soccer,11v11 + 2x7v7 + 7v7,22,Synthétique + naturel,Réservable par permis,,https://montreal.ca/lieux/terrains-de-soccer-du-parc-daniel-johnson,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL110,Terrains de soccer du parc Ferland,"6020, boulevard Lavoisier, Montréal (Québec)",45.59718,-73.598568,soccer,,,,,,https://montreal.ca/lieux/terrains-de-soccer-du-parc-ferland,,libre,,"Arrondissement : Saint-Léonard
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL111,Terrains de soccer du parc Hébert,"7505, boulevard Provencher, Montréal (Québec)",45.572575,-73.591777,soccer,,,,,,https://montreal.ca/lieux/terrains-de-soccer-du-parc-hebert,,libre,,"Arrondissement : Saint-Léonard
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL112,Terrains de soccer du parc Jarry,"205, rue Gary-Carter, Montréal (Québec)",45.534894,-73.631532,soccer,,,,,,https://montreal.ca/lieux/terrains-de-soccer-du-parc-jarry,,libre,,"Arrondissement : Villeray–Saint-Michel–Parc-Extension
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL114,Terrains de soccer du parc Loyola,"4877, avenue Doherty, Montréal (Québec)",45.461411,-73.646182,soccer,,,Synthétique + 4 naturels,Réservable (priorité permis),,https://montreal.ca/lieux/terrains-de-soccer-du-parc-loyola,,libre,,"Arrondissement : Côte-des-Neiges–Notre-Dame-de-Grâce
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL115,Terrains de soccer du parc Saint-Jean-Baptiste,"1050, boulevard Saint-Jean-Baptiste, Montréal (Québec)",45.640576,-73.498532,soccer,2x7v7,14,Gazon naturel,Réservable par permis,,https://montreal.ca/lieux/terrains-de-soccer-du-parc-saint-jean-baptiste,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL116,Terrains de soccer du parc Trenholme,"6800, rue Sherbrooke Ouest, Montréal (Québec)",45.460749,-73.631387,soccer,,,,,,https://montreal.ca/lieux/terrains-de-soccer-du-parc-trenholme,,libre,,"Arrondissement : Côte-des-Neiges–Notre-Dame-de-Grâce
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL117,Terrains de soccer du parc Villeray,"8000, rue De Normanville, Montréal (Québec)",45.546648,-73.620101,soccer,,,Synthétique + naturel,Accès libre (horaires),,https://montreal.ca/lieux/terrains-de-soccer-du-parc-villeray,,libre,,"Arrondissement : Villeray–Saint-Michel–Parc-Extension
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL118,Terrains de soccer Jason-Di Tullio du parc Samuel-Morse,"12100, avenue François-Larocque, Montréal (Québec)",45.639721,-73.585382,soccer,4x7v7,14,Synthétique,Réservable par permis,,https://montreal.ca/lieux/terrains-de-soccer-jason-di-tullio-du-parc-samuel-morse,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."
+MTL120,Terrains synthétiques extérieurs du complexe sportif St-Jean-Vianney,"12640, boulevard Gouin Est, Montréal (Québec)",45.691621,-73.519654,soccer,,,Synthétique,,,https://montreal.ca/lieux/terrains-synthetiques-exterieurs-du-complexe-sportif-st-jean-vianney,,libre,,"Arrondissement : Rivière-des-Prairies–Pointe-aux-Trembles
+Voir la fiche Montréal.ca pour les horaires, réservations et restrictions."

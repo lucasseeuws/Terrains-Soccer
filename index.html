@@ -375,7 +375,8 @@ async function loadTerrainsFromCSV(){
         format: row.format || '',
         capacity: Number(row.capacity) || 0,
         surface: row.surface || '',
-        reservable: String(row.reservable||'').toLowerCase().startsWith('oui'),
+        access: row.access || '',
+        montrealUrl: row.montrealUrl || '',
         reserveUrl: row.reserveUrl || '',
         embedUrl: row.embed_url || '',
         photoUrl: row.photo_url || '',
@@ -386,7 +387,7 @@ async function loadTerrainsFromCSV(){
     TERRAINS.forEach(t=>{
       t.formatTags = (t.format||'').split(',').map(s=>s.trim()).filter(Boolean);
       t.surfaceTag = t.surface || '';
-      t.accessTag = t.reservable ? 'Réservable' : 'Pick-up';
+      t.accessTag = t.access || '';
     });
     buildFilterGroups();
     if(statusEl) statusEl.style.display = 'none';
@@ -532,10 +533,9 @@ function fmtDist(km){
 
 const map = L.map('map', {zoomControl:false}).setView([45.5301, -73.6000], 12);
 L.control.zoom({position:'topright'}).addTo(map);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution:'&copy; OpenStreetMap contributors',
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+  attribution:'Tiles &copy; Esri — Source: Esri, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, Esri China (Hong Kong), Esri Korea, Esri (Thailand), © OpenStreetMap contributors, GIS User Community',
   maxZoom:19,
-  subdomains:'abc',
 }).addTo(map);
 
 let mapUserMoved = false;
@@ -554,15 +554,16 @@ let FILTER_GROUPS = [];
 let activeFilters = {format:new Set(), surface:new Set(), access:new Set()};
 
 function buildFilterGroups(){
-  const formats = new Set(), surfaces = new Set();
+  const formats = new Set(), surfaces = new Set(), access = new Set();
   TERRAINS.forEach(t=>{
     (t.formatTags||[]).forEach(f=>formats.add(f));
     if(t.surfaceTag) surfaces.add(t.surfaceTag);
+    if(t.accessTag) access.add(t.accessTag);
   });
   FILTER_GROUPS = [
     {key:'format', label:'Format', values:[...formats].sort()},
     {key:'surface', label:'Surface', values:[...surfaces].sort()},
-    {key:'access', label:'Accès', values:['Réservable','Pick-up']},
+    {key:'access', label:'Accès', values:[...access].sort()},
   ];
 }
 
@@ -726,10 +727,22 @@ window.copyEmail = copyEmail;
 
 function renderReservationRow(t){
   if(!t.reserveUrl) return '';
-  const inner = t.reserveUrl.startsWith('mailto:')
-    ? (()=>{ const email = t.reserveUrl.replace('mailto:',''); return `<div class="email-row"><span class="email-text">${email}</span><button class="copy-btn" onclick="copyEmail('${email}', this)">Copier</button></div>`; })()
-    : `<a class="reserve-link" href="${t.reserveUrl}" target="_blank" rel="noopener">Réservation officielle / infos</a>`;
+  let inner;
+  if(t.reserveUrl.startsWith('mailto:')){
+    const email = t.reserveUrl.replace('mailto:','');
+    inner = `<div class="email-row"><span class="email-text">${email}</span><button class="copy-btn" onclick="copyEmail('${email}', this)">Copier</button></div>`;
+  }else if(t.reserveUrl.startsWith('tel:')){
+    const digits = t.reserveUrl.replace('tel:+1','');
+    const phone = digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    inner = `<a class="reserve-link" href="${t.reserveUrl}">Appeler — ${phone}</a>`;
+  }else{
+    inner = `<a class="reserve-link" href="${t.reserveUrl}" target="_blank" rel="noopener">Réservation officielle / infos</a>`;
+  }
   return `<div class="section"><h3>Réserver</h3>${inner}</div>`;
+}
+function renderMontrealLink(t){
+  if(!t.montrealUrl) return '';
+  return `<a class="reserve-link" style="background:var(--panel);border:1px solid var(--line);color:var(--ink);margin-top:8px;" href="${t.montrealUrl}" target="_blank" rel="noopener">Voir la fiche officielle Montréal.ca</a>`;
 }
 
 function escapeHtml(s){
@@ -753,7 +766,7 @@ function openDetail(id){
 
   const tags = [...(t.formatTags||[])];
   if(t.surfaceTag) tags.push(t.surfaceTag);
-  tags.push(t.accessTag);
+  if(t.accessTag) tags.push(t.accessTag);
   const tagsHtml = `<div class="tag-row">${tags.map(x=>`<span class="tag">${x}</span>`).join('')}</div>`;
 
   let notesHtml = '';
@@ -783,6 +796,7 @@ function openDetail(id){
       </div>
 
       ${renderReservationRow(t)}
+      ${renderMontrealLink(t)}
 
       ${notesHtml ? `<div class="section"><h3>Détails</h3>${notesHtml}</div>` : ''}
     </div>
