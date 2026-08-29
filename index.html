@@ -94,6 +94,27 @@
   .filter-chip:hover{border-color:var(--floodlight);}
   .filter-chip.active{background:var(--floodlight);color:#fff;border-color:var(--floodlight);}
 
+  .filter-toggle-btn{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
+    padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);
+    color:var(--ink);font-weight:600;font-size:13px;cursor:pointer;
+  }
+  .filter-toggle-btn:hover{border-color:var(--floodlight);}
+  .filter-badge{
+    background:var(--floodlight);color:#fff;font-size:11px;font-weight:700;
+    border-radius:999px;padding:1px 7px;
+  }
+  .filter-caret{font-size:10px;color:var(--ink-dim);}
+  .filter-panel{margin-top:10px;}
+  .filter-clear{
+    display:block;margin-top:8px;font-size:11.5px;font-weight:600;color:var(--occupe);
+    background:none;border:none;cursor:pointer;padding:0;
+  }
+  .filter-clear:hover{text-decoration:underline;}
+
+  .map-filter-btn{display:none;}
+  .map-filter-overlay{display:none;}
+
   .card{
     background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
     padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s ease, box-shadow .15s ease;
@@ -257,6 +278,19 @@
     #map.mobile-hidden{display:none;}
     aside.list{display:none;}
     aside.list.mobile-open{display:flex; width:100%; flex:1;}
+
+    .map-filter-btn{
+      display:flex; align-items:center; gap:6px;
+      position:fixed; right:14px; bottom:16px; z-index:900;
+      background:var(--accent-dark); color:var(--on-accent); border:none; border-radius:999px;
+      padding:11px 18px; font-weight:600; font-size:13px; cursor:pointer; box-shadow:var(--shadow);
+    }
+    .map-filter-overlay{
+      display:none; position:fixed; left:14px; right:14px; bottom:70px; z-index:900;
+      background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+      padding:14px; box-shadow:var(--shadow); max-height:55vh; overflow-y:auto;
+    }
+    .map-filter-overlay.open{display:block;}
     .scoreboard{left:8px;bottom:8px;padding:8px 10px;gap:10px;flex-wrap:wrap;max-width:210px;}
     .top-meta{display:none;}
   }
@@ -292,6 +326,11 @@
   </main>
 
   <div class="scoreboard" id="scoreboard"></div>
+
+  <button id="mapFilterBtn" class="map-filter-btn" onclick="toggleFilterPanel()">
+    Filtrer <span id="mapFilterBadge" class="filter-badge" style="display:none;"></span>
+  </button>
+  <div id="mapFilterOverlay" class="map-filter-overlay"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -493,9 +532,10 @@ function fmtDist(km){
 
 const map = L.map('map', {zoomControl:false}).setView([45.5301, -73.6000], 12);
 L.control.zoom({position:'topright'}).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-  attribution:'&copy; OpenStreetMap, &copy; CARTO',
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution:'&copy; OpenStreetMap contributors',
   maxZoom:19,
+  subdomains:'abc',
 }).addTo(map);
 
 let mapUserMoved = false;
@@ -536,8 +576,13 @@ function terrainMatchesFilters(t){
     return true;
   });
 }
+function activeFilterCount(){
+  return Object.values(activeFilters).reduce((sum,set)=>sum+set.size, 0);
+}
 
-function renderFilterChips(){
+let filterPanelOpen = false;
+
+function renderFilterPanelContent(){
   return FILTER_GROUPS.map(g=>`
     <div class="filter-group">
       <span class="filter-group-label">${g.label}</span>
@@ -548,12 +593,40 @@ function renderFilterChips(){
     </div>
   `).join('');
 }
+
+// synchronise les deux emplacements possibles du panneau de filtres (liste desktop/mobile, et bouton flottant sur la carte mobile)
+function syncFilterUI(){
+  showList();
+  const overlay = document.getElementById('mapFilterOverlay');
+  if(overlay){
+    const count = activeFilterCount();
+    overlay.innerHTML = renderFilterPanelContent() + (count>0 ? `<button class="filter-clear" onclick="clearFilters()">Réinitialiser les filtres</button>` : '');
+  }
+  const badge = document.getElementById('mapFilterBadge');
+  if(badge){
+    const count = activeFilterCount();
+    badge.textContent = count;
+    badge.style.display = count>0 ? 'inline-block' : 'none';
+  }
+  applyMobileView();
+}
+
 window.toggleFilter = function(key, val){
   const set = activeFilters[key];
   if(set.has(val)) set.delete(val); else set.add(val);
-  showList();
-  applyMobileView();
+  mapUserMoved = false; // un changement de filtre doit recadrer sur les terrains concernés
+  syncFilterUI();
   render();
+};
+window.clearFilters = function(){
+  Object.values(activeFilters).forEach(s=>s.clear());
+  mapUserMoved = false;
+  syncFilterUI();
+  render();
+};
+window.toggleFilterPanel = function(){
+  filterPanelOpen = !filterPanelOpen;
+  syncFilterUI();
 };
 
 // vue mobile : 'map' | 'list' | 'detail' — sur desktop ces classes n'ont aucun effet (voir CSS)
@@ -570,6 +643,12 @@ function applyMobileView(){
   if(tabMap) tabMap.classList.toggle('active', mobileView==='map');
   if(tabList) tabList.classList.toggle('active', mobileView==='list');
   if(!showSidebar) setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} }, 50); // la carte redevient visible : recalcule sa taille
+
+  // bouton flottant "Filtrer" : uniquement utile sur la vue carte mobile (ailleurs, les filtres sont déjà dans la liste)
+  const filterBtn = document.getElementById('mapFilterBtn');
+  if(filterBtn) filterBtn.style.display = (mobileView==='map') ? '' : 'none';
+  const overlay = document.getElementById('mapFilterOverlay');
+  if(overlay) overlay.classList.toggle('open', filterPanelOpen && mobileView==='map');
 }
 window.setMobileTab = function(view){
   mobileView = view;
@@ -750,12 +829,19 @@ function currentList(){
 function showList(){
   selectedId = null;
   const list = currentList();
+  const count = activeFilterCount();
   document.getElementById('sidebar').innerHTML = `
     <div class="list-head">
       <h2>Terrains — ${SPORTS.find(s=>s.id===activeSport).label}</h2>
       <p>Cliquer un terrain pour voir sa fiche.</p>
     </div>
-    <div class="filter-bar">${renderFilterChips()}</div>
+    <div class="filter-bar">
+      <button class="filter-toggle-btn" onclick="toggleFilterPanel()">
+        <span>Filtrer les terrains${count>0?` <span class="filter-badge">${count}</span>`:''}</span>
+        <span class="filter-caret">${filterPanelOpen?'▲':'▼'}</span>
+      </button>
+      ${filterPanelOpen ? `<div class="filter-panel">${renderFilterPanelContent()}${count>0?'<button class="filter-clear" onclick="clearFilters()">Réinitialiser les filtres</button>':''}</div>` : ''}
+    </div>
     <div class="list-body" id="listBody"></div>
   `;
   renderListBody(list);
