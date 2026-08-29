@@ -83,6 +83,17 @@
   .list-head p{margin:0;font-size:12px;color:var(--on-accent-dim);}
   .list-body{flex:1;overflow-y:auto;padding:10px;}
 
+  .filter-bar{padding:10px 14px;border-bottom:1px solid var(--line);background:var(--panel);flex-shrink:0;}
+  .filter-group{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px;}
+  .filter-group:last-child{margin-bottom:0;}
+  .filter-group-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-dim);margin-right:2px;min-width:50px;}
+  .filter-chip{
+    font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid var(--line);
+    background:var(--bg);color:var(--ink-dim);cursor:pointer;white-space:nowrap;
+  }
+  .filter-chip:hover{border-color:var(--floodlight);}
+  .filter-chip.active{background:var(--floodlight);color:#fff;border-color:var(--floodlight);}
+
   .card{
     background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
     padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s ease, box-shadow .15s ease;
@@ -230,7 +241,8 @@
   @media (max-width:820px){
     .filters{display:none;}
     .mobile-sport-select{
-      display:block; margin:10px 22px 0; padding:9px 10px; border-radius:8px;
+      display:block; margin:10px 22px 0; width:calc(100% - 44px); box-sizing:border-box;
+      padding:9px 10px; border-radius:8px;
       border:1px solid var(--line); background:var(--panel); color:var(--ink); font-weight:600; font-size:13px;
     }
     .mobile-tabs{
@@ -332,6 +344,12 @@ async function loadTerrainsFromCSV(){
         reservedSlots: parseSlots(row.reserved_slots),
         notes: row.notes || '',
       }));
+    TERRAINS.forEach(t=>{
+      t.formatTags = (t.format||'').split(',').map(s=>s.trim()).filter(Boolean);
+      t.surfaceTag = t.surface || '';
+      t.accessTag = t.reservable ? 'Réservable' : 'Pick-up';
+    });
+    buildFilterGroups();
     if(statusEl) statusEl.style.display = 'none';
   }catch(e){
     console.error('Échec du chargement de terrains.csv :', e);
@@ -401,127 +419,17 @@ function todaysDbSlots(t){
    localStorage (fonctionne une fois le site déployé, mais reste propre
    à cet appareil/navigateur — pas de partage entre joueurs dans ce cas).
    ===================================================================== */
-const hasCloudStorage = (typeof window.storage !== 'undefined');
-function lsKey(key, shared){ return (shared ? 'shared:' : 'local:') + key; }
-
-async function storageGet(key, shared){
-  if(hasCloudStorage){ try{ return await window.storage.get(key, shared); }catch(e){ return null; } }
-  try{ const raw = localStorage.getItem(lsKey(key,shared)); return raw!==null ? {value:raw} : null; }catch(e){ return null; }
-}
-async function storageSet(key, value, shared){
-  if(hasCloudStorage){ try{ return await window.storage.set(key, value, shared); }catch(e){ return null; } }
-  try{ localStorage.setItem(lsKey(key,shared), value); return {value}; }catch(e){ return null; }
-}
-async function storageDelete(key, shared){
-  if(hasCloudStorage){ try{ return await window.storage.delete(key, shared); }catch(e){ return null; } }
-  try{ localStorage.removeItem(lsKey(key,shared)); }catch(e){}
-}
-async function storageList(prefix, shared){
-  if(hasCloudStorage){ try{ return await window.storage.list(prefix, shared); }catch(e){ return {keys:[]}; } }
-  try{
-    const marker = lsKey(prefix, shared).replace(prefix,''); // "local:" ou "shared:"
-    const keys = [];
-    for(let i=0;i<localStorage.length;i++){
-      const k = localStorage.key(i);
-      if(k && k.startsWith(marker) && k.slice(marker.length).startsWith(prefix)) keys.push(k.slice(marker.length));
-    }
-    return {keys};
-  }catch(e){ return {keys:[]}; }
-}
-
-let bookings = {};      // terrainId -> [{id,start,end,players,ts}]
-let myBookings = new Set(); // clés "terrainId|bookingId" créées depuis cette session
-
-async function loadMyBookings(){
-  const r = await storageGet('my-bookings', false);
-  if(r && r.value){ try{ myBookings = new Set(JSON.parse(r.value)); }catch(e){} }
-}
-async function saveMyBookings(){
-  await storageSet('my-bookings', JSON.stringify([...myBookings]), false);
-}
-
-async function loadCommunityData(){
-  await loadMyBookings();
-  const bookKeys = (await storageList('bookings:', true))?.keys || [];
-  for(const k of bookKeys){
-    const r = await storageGet(k, true);
-    if(r && r.value){
-      try{ bookings[k.replace('bookings:','')] = JSON.parse(r.value) || []; }catch(e){}
-    }
-  }
-  render();
-}
-
-function activeBookingsToday(terrainId){
-  const list = (bookings[terrainId]||[]);
-  const nm = nowMin();
-  return list.filter(b => toMin(b.end) > nm); // on garde celles qui ne sont pas encore terminées
-}
-
-async function addBooking(terrainId, startStr, endStr, players){
-  const startM = toMin(startStr), endM = toMin(endStr);
-  const capacity = (TERRAINS.find(t=>t.id===terrainId)||{}).capacity || 99;
-
-  // conflit avec un créneau "occupé" de la base de données
-  const t = TERRAINS.find(x=>x.id===terrainId);
-  const dbConflict = todaysDbSlots(t).find(s => s.status==='occupe' && startM < s.end && endM > s.start);
-  if(dbConflict){
-    return {ok:false, msg:`Conflit : le terrain est déjà réservé officiellement (${fmtMin(dbConflict.start)}–${fmtMin(dbConflict.end)}, ${dbConflict.label}).`};
-  }
-  // conflit avec une réservation communautaire existante
-  const existing = activeBookingsToday(terrainId);
-  const overlap = existing.find(b => startM < toMin(b.end) && endM > toMin(b.start));
-  if(overlap){
-    return {ok:false, msg:`Conflit : un autre joueur a déjà réservé ce terrain de ${overlap.start} à ${overlap.end}.`};
-  }
-  if(endM <= startM){
-    return {ok:false, msg:'L\'heure de fin doit être après l\'heure de début.'};
-  }
-  const entry = {id: 'b'+Date.now(), start:startStr, end:endStr, players: Math.min(players, capacity), ts: Date.now()};
-  const list = bookings[terrainId] = existing.concat(entry);
-  await storageSet('bookings:'+terrainId, JSON.stringify(list), true);
-  myBookings.add(terrainId+'|'+entry.id);
-  await saveMyBookings();
-  render();
-  return {ok:true};
-}
-window.addBooking = addBooking;
-
-async function deleteBooking(terrainId, bookingId){
-  const list = (bookings[terrainId]||[]).filter(b=>b.id!==bookingId);
-  bookings[terrainId] = list;
-  await storageSet('bookings:'+terrainId, JSON.stringify(list), true);
-  myBookings.delete(terrainId+'|'+bookingId);
-  await saveMyBookings();
-  render();
-  openDetail(terrainId);
-}
-window.deleteBooking = deleteBooking;
 
 /* =====================================================================
-   CALCUL DU STATUT EFFECTIF
-   Priorité : occupation en direct (fraîche) > réservation communautaire
-   active > créneau officiel de la base de données > statut de base.
-   "bientôt occupé" (orange) prime visuellement si une transition vers
-   occupé arrive dans les 30 prochaines minutes et qu'on n'est pas déjà
-   occupé/ouvert.
+   CALCUL DU STATUT EFFECTIF — purement une traduction UX de ce que la
+   base de données indique (elle-même reprise du site de la Ville).
+   Stadio n'invente ni ne modifie aucun statut : "bientôt occupé" (orange)
+   est juste un calcul dérivé d'un créneau "occupé" qui arrive dans les
+   30 prochaines minutes.
    ===================================================================== */
-function colorForCount(players, capacity){
-  if(players <= 0) return null;
-  return players > capacity/2 ? 'occupe' : 'signale';
-}
-
 function effectiveStatus(t){
   const nm = nowMin();
 
-  // 1. réservation communautaire active maintenant (couvre aussi l'occupation immédiate)
-  const activeBooking = activeBookingsToday(t.id).find(b => toMin(b.start) <= nm && nm < toMin(b.end));
-  if(activeBooking){
-    const st = colorForCount(activeBooking.players, t.capacity) || 'libre';
-    return {status:st, source:'booking', note:`Réservé par un joueur jusqu'à ${activeBooking.end} — ${activeBooking.players} pers.`, booking:activeBooking};
-  }
-
-  // 2. créneau officiel de la base de données
   const dbSlot = todaysDbSlots(t).find(s => s.start <= nm && nm < s.end);
   let status, note;
   if(dbSlot){
@@ -532,19 +440,10 @@ function effectiveStatus(t){
     note = '';
   }
 
-  // 3. "bientôt occupé" — seulement si actuellement libre
   if(status === 'libre'){
-    const upcoming = [];
-    todaysDbSlots(t).forEach(s=>{ if(s.status==='occupe' && s.start > nm && s.start - nm <= 30) upcoming.push({at:s.start, label:s.label}); });
-    activeBookingsToday(t.id).forEach(b=>{
-      const st = toMin(b.start);
-      if(st > nm && st - nm <= 30 && colorForCount(b.players, t.capacity) === 'occupe'){
-        upcoming.push({at:st, label:`réservation (${b.players} pers.)`});
-      }
-    });
+    const upcoming = todaysDbSlots(t).filter(s => s.status==='occupe' && s.start > nm && s.start - nm <= 30);
     if(upcoming.length){
-      upcoming.sort((a,b)=>a.at-b.at);
-      return {status:'bientot', source:'upcoming', note:`Occupé dans ${upcoming[0].at-nm} min — ${upcoming[0].label}`};
+      return {status:'bientot', source:'upcoming', note:`Occupé dans ${upcoming[0].start-nm} min — ${upcoming[0].label}`};
     }
   }
   return {status, source:'db', note};
@@ -607,6 +506,56 @@ let markers = {};
 let activeSport = 'soccer';
 let selectedId = null;
 
+/* =====================================================================
+   FILTRES PAR TAGS — Format, Surface, Accès. Une case cochée dans une
+   catégorie filtre en OU au sein de la catégorie, en ET entre catégories.
+   ===================================================================== */
+let FILTER_GROUPS = [];
+let activeFilters = {format:new Set(), surface:new Set(), access:new Set()};
+
+function buildFilterGroups(){
+  const formats = new Set(), surfaces = new Set();
+  TERRAINS.forEach(t=>{
+    (t.formatTags||[]).forEach(f=>formats.add(f));
+    if(t.surfaceTag) surfaces.add(t.surfaceTag);
+  });
+  FILTER_GROUPS = [
+    {key:'format', label:'Format', values:[...formats].sort()},
+    {key:'surface', label:'Surface', values:[...surfaces].sort()},
+    {key:'access', label:'Accès', values:['Réservable','Pick-up']},
+  ];
+}
+
+function terrainMatchesFilters(t){
+  return FILTER_GROUPS.every(g=>{
+    const sel = activeFilters[g.key];
+    if(!sel || sel.size===0) return true;
+    if(g.key==='format') return (t.formatTags||[]).some(f=>sel.has(f));
+    if(g.key==='surface') return sel.has(t.surfaceTag);
+    if(g.key==='access') return sel.has(t.accessTag);
+    return true;
+  });
+}
+
+function renderFilterChips(){
+  return FILTER_GROUPS.map(g=>`
+    <div class="filter-group">
+      <span class="filter-group-label">${g.label}</span>
+      ${g.values.map(v=>{
+        const active = activeFilters[g.key].has(v);
+        return `<span class="filter-chip ${active?'active':''}" onclick="toggleFilter('${g.key}', '${v.replace(/'/g,"\\'")}')">${v}</span>`;
+      }).join('')}
+    </div>
+  `).join('');
+}
+window.toggleFilter = function(key, val){
+  const set = activeFilters[key];
+  if(set.has(val)) set.delete(val); else set.add(val);
+  showList();
+  applyMobileView();
+  render();
+};
+
 // vue mobile : 'map' | 'list' | 'detail' — sur desktop ces classes n'ont aucun effet (voir CSS)
 let mobileView = 'map';
 let mobileLastView = 'map';
@@ -663,36 +612,16 @@ function openMiniPopup(t){
    PANNEAU DÉTAIL
    ===================================================================== */
 function renderTimeline(t){
-  const dbRows = todaysDbSlots(t).map(s=>({
-    start:s.start, end:s.end, status:s.status, label:s.label, kind:'db',
-  }));
-  const bookingRows = activeBookingsToday(t.id).map(b=>({
-    start:toMin(b.start), end:toMin(b.end),
-    status: colorForCount(b.players, t.capacity) || 'libre',
-    label: `Réservation — ${b.players} pers.${myBookings.has(t.id+'|'+b.id) ? ' (vous)' : ''}`,
-    kind:'booking', bookingId:b.id,
-  }));
-  const rows = dbRows.concat(bookingRows).sort((a,b)=>a.start-b.start);
+  const rows = todaysDbSlots(t);
   if(!rows.length) return `<div class="timeline-empty">Aucun horaire particulier aujourd'hui — terrain libre selon disponibilité.</div>`;
   const nm = nowMin();
   return rows.map(s=>{
     const active = nm >= s.start && nm < s.end;
-    const mine = s.kind==='booking' && myBookings.has(t.id+'|'+s.bookingId);
-    const delBtn = mine ? `<button class="copy-btn" style="margin-left:auto;" onclick="deleteBooking('${t.id}','${s.bookingId}')">Supprimer</button>` : '';
     return `<div class="timeline-row" style="${active?'font-weight:600;':''}">
       <span class="status-dot s-${s.status}-dot"></span>
-      <span class="hrs">${fmtMin(s.start)}–${fmtMin(s.end)}</span> ${s.label}${delBtn}
+      <span class="hrs">${fmtMin(s.start)}–${fmtMin(s.end)}</span> ${s.label}
     </div>`;
   }).join('');
-}
-
-function timeOptions(selected){
-  let out = '';
-  for(let m=0; m<24*60; m+=30){
-    const v = fmtMin(m);
-    out += `<option value="${v}" ${v===selected?'selected':''}>${v}</option>`;
-  }
-  return out;
 }
 
 function copyEmail(email, btn){
@@ -721,7 +650,7 @@ function renderReservationRow(t){
   const inner = t.reserveUrl.startsWith('mailto:')
     ? (()=>{ const email = t.reserveUrl.replace('mailto:',''); return `<div class="email-row"><span class="email-text">${email}</span><button class="copy-btn" onclick="copyEmail('${email}', this)">Copier</button></div>`; })()
     : `<a class="reserve-link" href="${t.reserveUrl}" target="_blank" rel="noopener">Réservation officielle / infos</a>`;
-  return `<div class="section"><h3>Réservation de permis</h3>${inner}</div>`;
+  return `<div class="section"><h3>Réserver</h3>${inner}</div>`;
 }
 
 function escapeHtml(s){
@@ -740,15 +669,12 @@ function openDetail(id){
   if(mobileView !== 'detail') mobileLastView = mobileView; // se souvenir d'où revenir
   mobileView = 'detail';
   const eff = effectiveStatus(t);
-  const nm = nowMin();
-  const nowStr = fmtMin(nm);
 
   const imgHtml = t.photoUrl ? `<img class="detail-img" src="${t.photoUrl}" alt="${t.name}" onerror="this.style.display='none'">` : '';
 
-  const tags = [];
-  if(t.format) tags.push(t.format);
-  if(t.surface) tags.push(t.surface);
-  if(t.capacity) tags.push(`${t.capacity} joueurs max`);
+  const tags = [...(t.formatTags||[])];
+  if(t.surfaceTag) tags.push(t.surfaceTag);
+  tags.push(t.accessTag);
   const tagsHtml = `<div class="tag-row">${tags.map(x=>`<span class="tag">${x}</span>`).join('')}</div>`;
 
   let notesHtml = '';
@@ -759,32 +685,6 @@ function openDetail(id){
          <div class="notes-box" id="notesFull-${t.id}" style="display:none;">${linkify(t.notes)}</div>`
       : `<div class="notes-box">${linkify(t.notes)}</div>`;
   }
-
-  const nextSlotIn30 = fmtMin(Math.min(23*60+59, nm + 30));
-  const startOpts = `<option value="${nowStr}">Maintenant (${nowStr})</option>` + timeOptions(nextSlotIn30);
-  const bookingSectionHtml = `
-    <div class="section">
-      <h3>Réservation</h3>
-      <div class="row">
-        <div style="flex:1;">
-          <label>Début</label>
-          <select id="bookStart">${startOpts}</select>
-        </div>
-        <div style="flex:1;">
-          <label>Fin</label>
-          <select id="bookEnd">${timeOptions(fmtMin(Math.min(23*60+59, nm+90)))}</select>
-        </div>
-      </div>
-      <div class="row">
-        <div style="flex:1;">
-          <label>Nombre de joueurs</label>
-          <input type="number" id="bookCount" min="1" max="${t.capacity||99}" value="4">
-        </div>
-      </div>
-      <button class="btn primary" onclick="submitBooking('${t.id}')">Réserver</button>
-      <div id="bookMsg"></div>
-    </div>
-  `;
 
   document.getElementById('sidebar').innerHTML = `
     <div class="detail">
@@ -803,8 +703,6 @@ function openDetail(id){
         ${renderTimeline(t)}
       </div>
 
-      ${bookingSectionHtml}
-
       ${renderReservationRow(t)}
 
       ${notesHtml ? `<div class="section"><h3>Détails</h3>${notesHtml}</div>` : ''}
@@ -821,20 +719,6 @@ function openDetail(id){
 }
 window.openDetail = openDetail;
 window.selectTerrain = (id)=>{ openDetail(id); };
-
-async function submitBooking(terrainId){
-  const start = document.getElementById('bookStart').value;
-  const end = document.getElementById('bookEnd').value;
-  const players = parseInt(document.getElementById('bookCount').value, 10) || 1;
-  const res = await addBooking(terrainId, start, end, players);
-  const msgEl = document.getElementById('bookMsg');
-  if(msgEl){
-    msgEl.className = 'form-msg ' + (res.ok ? 'ok' : 'error');
-    msgEl.textContent = res.ok ? 'Créneau réservé.' : res.msg;
-  }
-  if(res.ok) openDetail(terrainId);
-}
-window.submitBooking = submitBooking;
 
 /* =====================================================================
    LISTE (panneau par défaut)
@@ -858,7 +742,7 @@ function renderFilters(){
 window.setSport = (id)=>{ activeSport = id; selectedId = null; showList(); applyMobileView(); render(); };
 
 function currentList(){
-  const list = TERRAINS.filter(t=>t.sport===activeSport);
+  const list = TERRAINS.filter(t=>t.sport===activeSport && terrainMatchesFilters(t));
   if(!userPos) return list;
   return sortByDistance(list).map(x=>x.t);
 }
@@ -869,8 +753,9 @@ function showList(){
   document.getElementById('sidebar').innerHTML = `
     <div class="list-head">
       <h2>Terrains — ${SPORTS.find(s=>s.id===activeSport).label}</h2>
-      <p>Cliquer un terrain pour voir sa fiche et le réserver.</p>
+      <p>Cliquer un terrain pour voir sa fiche.</p>
     </div>
+    <div class="filter-bar">${renderFilterChips()}</div>
     <div class="list-body" id="listBody"></div>
   `;
   renderListBody(list);
@@ -920,7 +805,7 @@ function render(){
   markers = {};
   list.forEach(t=>{
     const eff = effectiveStatus(t);
-    const fresh = eff.source === 'booking';
+    const fresh = false;
     const m = L.marker([t.lat,t.lng], {icon: pinIcon(eff.status, fresh)}).addTo(map);
     m.bindPopup('', {closeButton:true, offset:[0,-4]});
     m.on('click', ()=> openMiniPopup(t));
@@ -945,7 +830,7 @@ function render(){
   showList();
   applyMobileView();
   requestGeolocation().then(()=> render()); // re-tri dès que la position est connue
-  await loadCommunityData(); // appelle déjà render()
+  render();
 })();
 setInterval(render, 30000);
 setInterval(loadTerrainsFromCSV, 5*60*1000);
